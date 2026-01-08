@@ -1,7 +1,6 @@
 const fetch = require('node-fetch');
 
 module.exports = async (req, res) => {
-  // Configuração CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -13,7 +12,7 @@ module.exports = async (req, res) => {
     const secretKey = process.env.ANUBIS_SECRET_KEY;
 
     if (!publicKey || !secretKey) {
-      return res.status(500).json({ error: 'Erro de configuração (Chaves).' });
+      return res.status(500).json({ error: 'Chaves de API não configuradas na Vercel.' });
     }
 
     const { amount, customer } = req.body;
@@ -23,15 +22,18 @@ module.exports = async (req, res) => {
       ? Math.round(parseFloat(amount.replace('R$', '').replace(/\./g, '').replace(',', '.')) * 100)
       : Math.round(amount * 100);
 
-    // --- CORREÇÃO DO TELEFONE (FORÇADA) ---
-    // Se o cliente não mandar telefone, usa o meu padrão.
-    // A AnubisPay EXIGE esse campo preenchido.
+    // 1. Tratamento do Telefone (Obrigatório)
     let finalPhone = "11999999999"; 
-    
     if (customer && customer.phone) {
-        // Limpa e deixa só números
         const clean = customer.phone.replace(/\D/g, '');
         if (clean.length >= 10) finalPhone = clean;
+    }
+
+    // 2. Tratamento do CPF (Se vier vazio, usa um CPF de teste válido para evitar erro 400)
+    let finalCpf = "12345678909";
+    if (customer && customer.cpf) {
+        const cleanCpf = customer.cpf.replace(/\D/g, '');
+        if (cleanCpf.length === 11) finalCpf = cleanCpf;
     }
 
     const payload = {
@@ -41,10 +43,10 @@ module.exports = async (req, res) => {
       customer: {
         name: customer?.name || 'Cliente Visitante',
         email: customer?.email || 'cliente@email.com',
-        phone: finalPhone, // Aqui vai o telefone garantido
+        phone: finalPhone,
         document: {
           type: 'cpf',
-          number: customer?.cpf?.replace(/\D/g, '') || '12345678909'
+          number: finalCpf
         }
       },
       items: [{ 
@@ -53,11 +55,14 @@ module.exports = async (req, res) => {
           quantity: 1,
           tangible: false
       }],
-      metadata: { provider: "Vercel Checkout" }
+      metadata: { provider: "Vercel Checkout" },
+      // 3. CORREÇÃO CRÍTICA: Adicionado o objeto PIX que estava faltando
+      pix: {
+        expires_in: 3600
+      }
     };
 
-    // Log para você conferir no painel da Vercel > Logs
-    console.log("PAYLOAD ENVIADO PARA ANUBIS:", JSON.stringify(payload));
+    console.log("Payload:", JSON.stringify(payload));
 
     const auth = Buffer.from(`${publicKey}:${secretKey}`).toString('base64');
     
@@ -72,26 +77,24 @@ module.exports = async (req, res) => {
 
     const text = await response.text();
     
-    // Verificação de Erro HTML
     if (text.trim().startsWith('<')) {
-        console.error("ERRO HTML ANUBIS:", text);
-        return res.status(502).json({ error: 'Erro na API Anubis (HTML retornado).' });
+        return res.status(502).json({ error: 'Erro HTML da AnubisPay (Gateway indisponível).' });
     }
 
     let data;
     try { data = JSON.parse(text); } catch(e) { 
-        return res.status(500).json({ error: 'Resposta inválida.' }); 
+        return res.status(500).json({ error: 'Resposta inválida do gateway.' }); 
     }
 
     if (!response.ok) {
-        console.error("ERRO ANUBIS JSON:", data);
+        console.error("ERRO ANUBIS:", data);
+        // Retorna o erro exato para você ver no console do navegador se precisar
         return res.status(response.status).json({ 
             error: 'Erro na AnubisPay', 
-            details: data // Isso vai mostrar o erro exato na sua tela
+            details: data 
         });
     }
 
-    // Sucesso
     return res.status(200).json({
         success: true,
         transactionId: data.Id || data.id,
