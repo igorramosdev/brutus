@@ -1,278 +1,777 @@
-<html>
+<!DOCTYPE html>
+<html lang="pt-BR">
 <head>
-  <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Finalizar Pagamento</title>
-  
-  <link type="text/css" href="/css/delivry-25.css" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
-  
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-  <style>
-    /* Estilos Específicos da Página de Pagamento */
-    .containerFinalizar { margin-top: 20px; max-width: 600px; margin-left: auto; margin-right: auto; }
-    .payment-area { background: #fff; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-    #qrcode { display: flex; justify-content: center; margin: 20px 0; min-height: 200px; align-items: center; }
-    #qrcode img { max-width: 250px; width: 100%; border: 1px solid #eee; padding: 5px; border-radius: 10px; }
-    textarea { width: 100%; height: 80px; padding: 10px; border: 1px dashed #ea1d2c; border-radius: 8px; background: #fafafa; font-size: 12px; resize: none; color: #555; }
-    .copy-code { width: 100%; background: #ea1d2c; color: white; border: none; padding: 15px; border-radius: 50px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s; }
-    .copy-code:hover { background: #c41421; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pagamento Pix - Cardápio Digital</title>
     
-    /* Steps */
-    .steps { display: flex; justify-content: space-between; margin-top: 30px; position: relative; }
-    .step { text-align: center; width: 30%; opacity: 0.5; transition: 0.3s; z-index: 2; }
-    .step.active { opacity: 1; font-weight: bold; }
-    .s-circle { width: 30px; height: 30px; background: #eee; border-radius: 50%; margin: 0 auto 5px; display: flex; align-items: center; justify-content: center; color: #555; }
-    .step.active .s-circle { background: #ea1d2c; color: white; }
-    .step-line { position: absolute; top: 15px; left: 15%; width: 70%; height: 2px; background: #eee; z-index: 1; }
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
-    /* Loading */
-    .loading-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.9); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10; border-radius: 15px; }
-    .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #ea1d2c; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-  </style>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- QRCode.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #ea1d2c 0%, #c41421 100%);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .order-summary {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+        }
+        
+        .order-summary h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            color: #555;
+        }
+        
+        .summary-item.total {
+            font-weight: bold;
+            font-size: 18px;
+            color: #ea1d2c;
+            border-top: 1px solid #ddd;
+            padding-top: 10px;
+            margin-top: 10px;
+        }
+        
+        .pix-area {
+            text-align: center;
+            margin: 25px 0;
+        }
+        
+        .timer {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+        
+        .timer.expiring {
+            color: #ea1d2c;
+            font-weight: bold;
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        
+        #qrcode {
+            display: inline-block;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            border: 1px solid #e0e0e0;
+            margin: 15px 0;
+        }
+        
+        #qrcode img {
+            width: 200px;
+            height: 200px;
+        }
+        
+        .code-area {
+            margin-top: 20px;
+        }
+        
+        .code-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+            text-align: left;
+        }
+        
+        textarea#pix-code {
+            width: 100%;
+            height: 80px;
+            padding: 12px;
+            border: 2px dashed #ea1d2c;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 12px;
+            resize: none;
+            background: #fafafa;
+            color: #333;
+        }
+        
+        .copy-btn {
+            width: 100%;
+            padding: 15px;
+            background: #ea1d2c;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .copy-btn:hover {
+            background: #c41421;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(234, 29, 44, 0.2);
+        }
+        
+        .copy-btn.copied {
+            background: #28a745;
+        }
+        
+        .steps {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+            margin: 30px 0;
+        }
+        
+        .steps::before {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 10%;
+            width: 80%;
+            height: 2px;
+            background: #e0e0e0;
+            z-index: 1;
+        }
+        
+        .step {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            width: 33.33%;
+        }
+        
+        .step-circle {
+            width: 30px;
+            height: 30px;
+            background: #e0e0e0;
+            color: #888;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 8px;
+            font-weight: bold;
+        }
+        
+        .step.active .step-circle {
+            background: #ea1d2c;
+            color: white;
+            box-shadow: 0 0 0 5px rgba(234, 29, 44, 0.1);
+        }
+        
+        .step-label {
+            font-size: 12px;
+            color: #888;
+        }
+        
+        .step.active .step-label {
+            color: #ea1d2c;
+            font-weight: bold;
+        }
+        
+        .instructions {
+            background: #f0f7ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 25px;
+        }
+        
+        .instructions h4 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .instructions ol {
+            margin-left: 20px;
+            color: #555;
+            line-height: 1.6;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #ea1d2c;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error-box {
+            text-align: center;
+            padding: 30px;
+            background: #fff0f0;
+            border-radius: 10px;
+            border: 1px solid #ffcccc;
+            margin: 20px 0;
+        }
+        
+        .error-box h3 {
+            color: #ea1d2c;
+            margin-bottom: 10px;
+        }
+        
+        .retry-btn {
+            padding: 10px 25px;
+            background: #ea1d2c;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #888;
+            font-size: 12px;
+            border-top: 1px solid #eee;
+            margin-top: 20px;
+        }
+    </style>
 </head>
-
 <body>
-  <header id="topo">
-    <div class="cover main" style="background-color: #ea1d2c; height: 100px; display:flex; align-items:center; justify-content:center;">
-        <h1 style="color: white; font-size: 1.5rem;">Finalizar Pedido</h1>
-    </div>
-  </header>
-
-  <div class="container containerFinalizar">
-    <div class="payment-area">
-      
-      <div id="loading" class="loading-overlay">
-        <div class="spinner"></div>
-        <p style="margin-top: 10px;">Gerando seu Pix...</p>
-      </div>
-
-      <h2 style="text-align: center; color: #ea1d2c;">Pagamento via Pix</h2>
-      <p style="text-align: center; color: #666; font-size: 0.9rem;">O QR Code expira em 30 minutos</p>
-
-      <div id="qrcode"></div>
-
-      <div style="position: relative;">
-        <textarea id="pix-text" readonly onclick="this.select()">Aguardando geração do código...</textarea>
-        <button class="copy-code" id="btn-copy">
-          <i class="fa fa-copy"></i> COPIAR CÓDIGO PIX
-        </button>
-      </div>
-
-      <div class="steps">
-        <div class="step-line"></div>
-        <div class="step active" id="step1">
-          <div class="s-circle">1</div>
-          <span>Gerar</span>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-qrcode"></i> Pagamento via Pix</h1>
+            <p>Rápido, seguro e sem taxas</p>
         </div>
-        <div class="step active" id="step2">
-          <div class="s-circle"><i class="fa fa-qrcode"></i></div>
-          <span>Pagar</span>
-        </div>
-        <div class="step" id="step3">
-          <div class="s-circle"><i class="fa fa-check"></i></div>
-          <span>Aprovado</span>
-        </div>
-      </div>
-
-      <div class="how-to-pay" style="margin-top: 30px; font-size: 0.85rem; color: #555;">
-        <strong>Como pagar:</strong>
-        <ol style="margin-left: 20px; line-height: 1.6;">
-            <li>Abra o app do seu banco.</li>
-            <li>Escolha a opção <b>Pix</b> > <b>Ler QR Code</b> ou <b>Pix Copia e Cola</b>.</li>
-            <li>Escaneie a imagem ou cole o código acima.</li>
-            <li>Confirme os dados e finalize.</li>
-        </ol>
-      </div>
-
-    </div>
-  </div>
-
-  <footer>
-    <div style="padding: 20px; text-align: center; color: white; background: #ea1d2c; margin-top: 30px;">
-        <p>&copy; 2025 Cheff Burguer - Pagamento Seguro</p>
-    </div>
-  </footer>
-
-  <script>
-    document.addEventListener("DOMContentLoaded", async () => {
-        // Seletores seguros
-        const qrCodeContainer = document.getElementById('qrcode');
-        const pixTextarea = document.querySelector(".payment textarea");
-        const copyButton = document.getElementById("copy-code");
-        const steps = document.querySelectorAll(".steps .step");
         
-        // --- 1. Captura de Dados ---
-        const urlParams = new URLSearchParams(window.location.search);
-        let amount = urlParams.get('amount');
-        let customerName = urlParams.get('name');
-        
-        if (!amount) {
-            const cartData = localStorage.getItem('totalCart'); 
-            if (cartData) amount = cartData;
-        }
-
-        let customerPhone = "11999999999";
-        let customerCpf = ""; 
-        
-        const savedData = localStorage.getItem('dadosUsuario');
-        if (savedData) {
-             try {
-                 const parsed = JSON.parse(savedData);
-                 if (parsed.telefone) customerPhone = parsed.telefone;
-                 if (parsed.cpf) customerCpf = parsed.cpf;
-             } catch(e) {}
-        }
-        
-        if (urlParams.get('phone')) customerPhone = urlParams.get('phone');
-        if (urlParams.get('cpf')) customerCpf = urlParams.get('cpf');
-
-        const paymentPayload = {
-            amount: amount || "29.90",
-            description: "Pedido Confirmado",
-            customer: {
-                name: customerName || "Cliente",
-                email: "cliente@gmail.com",
-                cpf: customerCpf,
-                phone: customerPhone
-            }
-        };
-
-        // --- 2. Função de Geração ---
-        async function generatePix() {
-            try {
-                // LIMPA O CONTAINER ANTES DE COMEÇAR (Corrige erro visual)
-                if(qrCodeContainer) {
-                    qrCodeContainer.innerHTML = '<div style="margin:20px; text-align:center;"><i class="fas fa-spinner fa-spin" style="color:#ea1d2c;"></i><p>Gerando Pix...</p></div>';
-                }
+        <div class="content">
+            <!-- Order Summary -->
+            <div class="order-summary" id="order-summary">
+                <h3><i class="fas fa-receipt"></i> Resumo do Pedido</h3>
+                <div class="summary-item">
+                    <span>Itens:</span>
+                    <span id="order-items">Carregando...</span>
+                </div>
+                <div class="summary-item">
+                    <span>Taxa de entrega:</span>
+                    <span id="delivery-fee">R$ 0,00</span>
+                </div>
+                <div class="summary-item total">
+                    <span>Total a pagar:</span>
+                    <span id="total-amount">R$ 0,00</span>
+                </div>
+            </div>
+            
+            <!-- Loading State -->
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Gerando QR Code Pix...</p>
+            </div>
+            
+            <!-- Pix Area (hidden initially) -->
+            <div class="pix-area" id="pix-area" style="display: none;">
+                <div class="timer" id="timer">
+                    <i class="fas fa-clock"></i> Expira em: <span id="countdown">30:00</span>
+                </div>
                 
-                const baseUrl = window.location.origin;
-                const endpoint = `${baseUrl}/api/generate-pix`; 
+                <div id="qrcode"></div>
+                
+                <div class="code-area">
+                    <div class="code-label">
+                        <i class="fas fa-copy"></i> Código Pix Copia e Cola:
+                    </div>
+                    <textarea id="pix-code" readonly 
+                              placeholder="Aguardando geração do código Pix..."></textarea>
+                    <button class="copy-btn" id="copy-btn">
+                        <i class="fas fa-copy"></i> COPIAR CÓDIGO
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Error Box (hidden initially) -->
+            <div class="error-box" id="error-box" style="display: none;">
+                <h3><i class="fas fa-exclamation-triangle"></i> Erro ao gerar Pix</h3>
+                <p id="error-message">Mensagem de erro</p>
+                <button class="retry-btn" id="retry-btn">
+                    <i class="fas fa-redo"></i> Tentar Novamente
+                </button>
+            </div>
+            
+            <!-- Steps -->
+            <div class="steps">
+                <div class="step active" id="step1">
+                    <div class="step-circle">1</div>
+                    <div class="step-label">Gerar Pix</div>
+                </div>
+                <div class="step" id="step2">
+                    <div class="step-circle"><i class="fas fa-qrcode"></i></div>
+                    <div class="step-label">Pagar</div>
+                </div>
+                <div class="step" id="step3">
+                    <div class="step-circle"><i class="fas fa-check"></i></div>
+                    <div class="step-label">Aprovado</div>
+                </div>
+            </div>
+            
+            <!-- Instructions -->
+            <div class="instructions">
+                <h4><i class="fas fa-info-circle"></i> Como pagar:</h4>
+                <ol>
+                    <li>Abra o aplicativo do seu banco ou carteira digital</li>
+                    <li>Selecione a opção <strong>Pix</strong></li>
+                    <li>Escolha <strong>Ler QR Code</strong> e escaneie a imagem acima</li>
+                    <li>OU escolha <strong>Pix Copia e Cola</strong> e cole o código</li>
+                    <li>Confirme os dados e finalize o pagamento</li>
+                </ol>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p><i class="fas fa-lock"></i> Pagamento 100% seguro via AnubisPay</p>
+            <p>Em caso de dúvidas, contate nosso suporte</p>
+        </div>
+    </div>
 
-                console.log("Enviando...");
-
-                const response = await fetch(endpoint, { 
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(paymentPayload)
-                });
-
-                const textData = await response.text();
-                let data;
-
-                try { data = JSON.parse(textData); } 
-                catch (e) { throw new Error("Erro técnico no servidor."); }
-
-                if (response.ok && data.success) {
-                    renderPix(data);
-                    startPolling(data.transactionId);
-                } else {
-                    console.error("Erro API:", data);
-                    // Pega mensagem de erro detalhada se existir
-                    let msg = data.error;
-                    if(data.details && data.details.message) msg = data.details.message;
-                    if(data.details && data.details.error) msg = data.details.error;
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elementos DOM
+            const loadingEl = document.getElementById('loading');
+            const pixAreaEl = document.getElementById('pix-area');
+            const errorBoxEl = document.getElementById('error-box');
+            const errorMessageEl = document.getElementById('error-message');
+            const retryBtn = document.getElementById('retry-btn');
+            const copyBtn = document.getElementById('copy-btn');
+            const pixCodeEl = document.getElementById('pix-code');
+            const countdownEl = document.getElementById('countdown');
+            const timerEl = document.getElementById('timer');
+            const steps = [document.getElementById('step1'), 
+                          document.getElementById('step2'), 
+                          document.getElementById('step3')];
+            
+            // Elementos do resumo
+            const orderItemsEl = document.getElementById('order-items');
+            const deliveryFeeEl = document.getElementById('delivery-fee');
+            const totalAmountEl = document.getElementById('total-amount');
+            
+            // Variáveis de estado
+            let transactionId = null;
+            let countdownInterval = null;
+            let pollingInterval = null;
+            let expirationTime = 30 * 60; // 30 minutos em segundos
+            
+            // Carrega dados do pedido
+            function loadOrderData() {
+                try {
+                    // Tenta obter da URL
+                    const urlParams = new URLSearchParams(window.location.search);
+                    let amount = urlParams.get('amount');
+                    let items = urlParams.get('items') || 'Pedido Online';
                     
-                    throw new Error(msg || "Pagamento recusado.");
+                    // Tenta do localStorage
+                    if (!amount) {
+                        const cartData = localStorage.getItem('cart');
+                        if (cartData) {
+                            const cart = JSON.parse(cartData);
+                            amount = cart.total || cart.amount;
+                            items = cart.items?.map(i => i.name).join(', ') || 'Pedido Online';
+                        }
+                    }
+                    
+                    // Fallback
+                    if (!amount) amount = '29.90';
+                    
+                    // Formata valores
+                    const amountNum = parseFloat(amount);
+                    const deliveryFee = 0; // Gratuito
+                    const total = amountNum + deliveryFee;
+                    
+                    // Atualiza UI
+                    orderItemsEl.textContent = items;
+                    deliveryFeeEl.textContent = deliveryFee === 0 ? 'Grátis' : 
+                        `R$ ${deliveryFee.toFixed(2).replace('.', ',')}`;
+                    totalAmountEl.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+                    
+                    return {
+                        amount: amountNum,
+                        items: items,
+                        customer: getCustomerData()
+                    };
+                } catch (error) {
+                    console.error('Erro ao carregar dados:', error);
+                    return {
+                        amount: 29.90,
+                        items: 'Pedido Online',
+                        customer: getCustomerData()
+                    };
                 }
-
-            } catch (error) {
-                console.error(error);
-                if (qrCodeContainer) {
-                    // LIMPA NOVAMENTE PARA NÃO DUPLICAR
-                    qrCodeContainer.innerHTML = `
-                        <div style="text-align:center; padding: 20px; background:#fff0f0; border-radius:10px; border:1px solid #ffcccc;">
-                            <p style="color:#ea1d2c; font-weight:bold;">Erro ao gerar Pix</p>
-                            <p style="color:#555; font-size: 0.9rem;">${error.message}</p>
-                            <button onclick="location.reload()" style="margin-top:15px; padding:8px 20px; border:none; background:#ea1d2c; color:white; border-radius:20px; cursor:pointer;">Tentar Novamente</button>
-                        </div>
-                    `;
-                }
-                if (pixTextarea) pixTextarea.value = "Erro.";
             }
-        }
-
-        // --- 3. Renderização ---
-        function renderPix(data) {
-            if (pixTextarea) pixTextarea.value = data.pix_copy_paste;
-            if (qrCodeContainer) {
-                qrCodeContainer.innerHTML = ''; // LIMPA LOADING
+            
+            // Obtém dados do cliente
+            function getCustomerData() {
+                try {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const savedData = localStorage.getItem('userData') || 
+                                     localStorage.getItem('dadosUsuario');
+                    
+                    let customer = {
+                        name: 'Cliente',
+                        email: 'cliente@email.com',
+                        cpf: '',
+                        phone: ''
+                    };
+                    
+                    // Tenta da URL
+                    if (urlParams.get('name')) customer.name = urlParams.get('name');
+                    if (urlParams.get('email')) customer.email = urlParams.get('email');
+                    if (urlParams.get('cpf')) customer.cpf = urlParams.get('cpf');
+                    if (urlParams.get('phone')) customer.phone = urlParams.get('phone');
+                    
+                    // Tenta do localStorage
+                    if (savedData) {
+                        try {
+                            const parsed = JSON.parse(savedData);
+                            if (parsed.nome) customer.name = parsed.nome;
+                            if (parsed.email) customer.email = parsed.email;
+                            if (parsed.cpf) customer.cpf = parsed.cpf;
+                            if (parsed.telefone) customer.phone = parsed.telefone;
+                            if (parsed.phone) customer.phone = parsed.phone;
+                        } catch(e) {}
+                    }
+                    
+                    return customer;
+                } catch (error) {
+                    console.error('Erro ao obter dados do cliente:', error);
+                    return {
+                        name: 'Cliente',
+                        email: 'cliente@email.com',
+                        cpf: '',
+                        phone: ''
+                    };
+                }
+            }
+            
+            // Gera o Pix
+            async function generatePix() {
+                try {
+                    showLoading();
+                    
+                    const orderData = loadOrderData();
+                    
+                    // Validação básica
+                    if (!orderData.customer.cpf || orderData.customer.cpf.replace(/\D/g, '').length !== 11) {
+                        throw new Error('Por favor, informe um CPF válido para continuar.');
+                    }
+                    
+                    if (!orderData.customer.phone || orderData.customer.phone.replace(/\D/g, '').length < 10) {
+                        throw new Error('Informe um telefone válido (com DDD).');
+                    }
+                    
+                    const payload = {
+                        amount: orderData.amount.toString(),
+                        customer: orderData.customer,
+                        orderId: `pedido_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+                    };
+                    
+                    console.log('Enviando requisição Pix:', payload);
+                    
+                    const response = await fetch('/api/generate-pix', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(payload)
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (response.ok && data.success) {
+                        transactionId = data.transactionId;
+                        showPix(data);
+                    } else {
+                        throw new Error(data.error || data.details?.message || 'Erro ao gerar Pix');
+                    }
+                } catch (error) {
+                    console.error('Erro na geração do Pix:', error);
+                    showError(error.message);
+                }
+            }
+            
+            // Exibe o Pix na tela
+            function showPix(data) {
+                hideLoading();
+                pixAreaEl.style.display = 'block';
                 
-                if (data.qr_code_base64 && data.qr_code_base64.length > 50) {
+                // Atualiza steps
+                updateStep(2);
+                
+                // Cria QR Code
+                const qrcodeContainer = document.getElementById('qrcode');
+                qrcodeContainer.innerHTML = '';
+                
+                if (data.qr_code_base64) {
                     const img = document.createElement('img');
                     img.src = data.qr_code_base64.startsWith('data:') 
                         ? data.qr_code_base64 
                         : `data:image/png;base64,${data.qr_code_base64}`;
-                    img.style.width = "100%";
-                    qrCodeContainer.appendChild(img);
-                } else {
-                    new QRCode(qrCodeContainer, {
+                    img.alt = 'QR Code Pix';
+                    qrcodeContainer.appendChild(img);
+                } else if (data.pix_copy_paste) {
+                    new QRCode(qrcodeContainer, {
                         text: data.pix_copy_paste,
-                        width: 250,
-                        height: 250,
-                        correctLevel: QRCode.CorrectLevel.L
+                        width: 200,
+                        height: 200,
+                        correctLevel: QRCode.CorrectLevel.M
                     });
                 }
-            }
-        }
-
-        // --- 4. Copiar Código ---
-        if(copyButton && pixTextarea){
-            copyButton.addEventListener('click', () => {
-                pixTextarea.select();
-                document.execCommand('copy');
-                const originalText = copyButton.textContent;
-                copyButton.textContent = 'Copiado!';
-                copyButton.style.backgroundColor = '#077c22';
-                setTimeout(() => {
-                    copyButton.textContent = originalText;
-                    copyButton.style.backgroundColor = '#ea1d2c';
-                }, 2000);
-            });
-        }
-
-        // --- 5. Polling ---
-        function startPolling(transactionId) {
-            if (!transactionId) return;
-            const baseUrl = window.location.origin;
-
-            const interval = setInterval(async () => {
-                try {
-                    const res = await fetch(`${baseUrl}/api/check-status?id=${transactionId}`);
-                    const statusData = await res.json();
-                    
-                    if (statusData.paid || statusData.status === 'PAID' || statusData.status === 'APPROVED') {
-                        clearInterval(interval);
-                        handlePaymentApproved();
-                    }
-                } catch (e) {}
-            }, 5000); 
-        }
-
-        function handlePaymentApproved() {
-            if(steps && steps.length > 1) {
-                steps[0].classList.remove('current-step');
-                steps[1].classList.add('current-step');
+                
+                // Atualiza código Pix
+                pixCodeEl.value = data.pix_copy_paste || 'Código não disponível';
+                
+                // Inicia contador
+                startCountdown();
+                
+                // Inicia verificação de status
+                startPolling();
             }
             
-            Swal.fire({
-                icon: 'success',
-                title: 'Pagamento Aprovado!',
-                text: 'Seu pedido está sendo preparado.',
-                confirmButtonColor: '#077c22',
-                confirmButtonText: 'Acompanhar Entrega'
-            }).then(() => {
-                window.location.href = '/entrega'; 
+            // Contador regressivo
+            function startCountdown() {
+                let timeLeft = expirationTime;
+                
+                if (countdownInterval) clearInterval(countdownInterval);
+                
+                countdownInterval = setInterval(() => {
+                    timeLeft--;
+                    
+                    if (timeLeft <= 0) {
+                        clearInterval(countdownInterval);
+                        countdownEl.textContent = '00:00';
+                        timerEl.classList.add('expiring');
+                        showPixExpired();
+                        return;
+                    }
+                    
+                    const minutes = Math.floor(timeLeft / 60);
+                    const seconds = timeLeft % 60;
+                    countdownEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                    
+                    // Destaca últimos 5 minutos
+                    if (timeLeft < 300) {
+                        timerEl.classList.add('expiring');
+                    }
+                }, 1000);
+            }
+            
+            // Verificação periódica do status
+            function startPolling() {
+                if (!transactionId) return;
+                
+                if (pollingInterval) clearInterval(pollingInterval);
+                
+                pollingInterval = setInterval(async () => {
+                    try {
+                        const response = await fetch(`/api/check-status?id=${transactionId}`);
+                        const data = await response.json();
+                        
+                        if (data.paid) {
+                            clearInterval(pollingInterval);
+                            clearInterval(countdownInterval);
+                            showPaymentApproved();
+                        } else if (data.expired) {
+                            clearInterval(pollingInterval);
+                            showPixExpired();
+                        } else if (data.failed) {
+                            clearInterval(pollingInterval);
+                            showPaymentFailed(data.status);
+                        }
+                    } catch (error) {
+                        console.error('Erro no polling:', error);
+                    }
+                }, 5000); // 5 segundos
+            }
+            
+            // Pix expirado
+            function showPixExpired() {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Pix Expirado!',
+                    html: 'O QR Code expirou após 30 minutos.<br>Clique em "Gerar Novo" para criar um novo código.',
+                    confirmButtonText: 'Gerar Novo',
+                    confirmButtonColor: '#ea1d2c',
+                    showCancelButton: true,
+                    cancelButtonText: 'Cancelar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        location.reload();
+                    }
+                });
+            }
+            
+            // Pagamento aprovado
+            function showPaymentApproved() {
+                updateStep(3);
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Pagamento Aprovado!',
+                    html: 'Seu pagamento foi confirmado com sucesso.<br>Seu pedido está sendo preparado.',
+                    confirmButtonText: 'Acompanhar Pedido',
+                    confirmButtonColor: '#28a745',
+                    allowOutsideClick: false
+                }).then(() => {
+                    // Redireciona para acompanhamento
+                    window.location.href = '/order-tracking?order=' + transactionId;
+                });
+            }
+            
+            // Pagamento falhou
+            function showPaymentFailed(status) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Pagamento Não Aprovado',
+                    text: `Status: ${status}. Por favor, tente novamente.`,
+                    confirmButtonText: 'Tentar Novamente',
+                    confirmButtonColor: '#ea1d2c'
+                }).then(() => {
+                    location.reload();
+                });
+            }
+            
+            // Atualiza steps
+            function updateStep(stepNumber) {
+                steps.forEach((step, index) => {
+                    if (index < stepNumber) {
+                        step.classList.add('active');
+                    } else {
+                        step.classList.remove('active');
+                    }
+                });
+            }
+            
+            // Mostra loading
+            function showLoading() {
+                loadingEl.style.display = 'block';
+                pixAreaEl.style.display = 'none';
+                errorBoxEl.style.display = 'none';
+            }
+            
+            // Esconde loading
+            function hideLoading() {
+                loadingEl.style.display = 'none';
+            }
+            
+            // Mostra erro
+            function showError(message) {
+                hideLoading();
+                errorBoxEl.style.display = 'block';
+                pixAreaEl.style.display = 'none';
+                errorMessageEl.textContent = message;
+            }
+            
+            // Event Listeners
+            copyBtn.addEventListener('click', function() {
+                pixCodeEl.select();
+                navigator.clipboard.writeText(pixCodeEl.value)
+                    .then(() => {
+                        const originalText = copyBtn.innerHTML;
+                        copyBtn.innerHTML = '<i class="fas fa-check"></i> CÓPIADO!';
+                        copyBtn.classList.add('copied');
+                        
+                        setTimeout(() => {
+                            copyBtn.innerHTML = originalText;
+                            copyBtn.classList.remove('copied');
+                        }, 2000);
+                    })
+                    .catch(err => {
+                        console.error('Erro ao copiar:', err);
+                        pixCodeEl.select();
+                        document.execCommand('copy');
+                    });
             });
-        }
-
-        // Inicia
-        generatePix();
-    });
-</script>
+            
+            retryBtn.addEventListener('click', function() {
+                generatePix();
+            });
+            
+            // Página inicializada
+            loadOrderData();
+            
+            // Inicia geração do Pix
+            setTimeout(() => {
+                generatePix();
+            }, 1000);
+        });
+    </script>
 </body>
 </html>
