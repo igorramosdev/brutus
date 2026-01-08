@@ -110,16 +110,15 @@
         let amount = urlParams.get('amount');
         let customerName = urlParams.get('name');
         
-        // Tenta pegar do LocalStorage se URL falhar
         if (!amount) {
             const cartData = localStorage.getItem('totalCart'); 
             if (cartData) amount = cartData;
         }
 
-        // Recupera dados salvos ou define padrões
         let customerPhone = "11999999999";
-        let customerCpf = "000.000.000-00"; // Backend vai substituir pelo seu válido
+        let customerCpf = "000.000.000-00"; 
         
+        // Recupera dados salvos
         const savedData = localStorage.getItem('dadosUsuario');
         if (savedData) {
              try {
@@ -129,7 +128,6 @@
              } catch(e) {}
         }
         
-        // Se veio na URL, tem prioridade
         if (urlParams.get('phone')) customerPhone = urlParams.get('phone');
         if (urlParams.get('cpf')) customerCpf = urlParams.get('cpf');
 
@@ -154,10 +152,7 @@
 
                 const response = await fetch(endpoint, { 
                     method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(paymentPayload)
                 });
 
@@ -166,8 +161,8 @@
 
                 try { data = JSON.parse(textData); } 
                 catch (e) { 
-                    console.error("Resposta não-JSON:", textData);
-                    throw new Error("Erro de comunicação com o servidor."); 
+                    // Se falhar o JSON, mostra o texto puro para debug
+                    throw new Error("Erro de servidor (Não é JSON): " + textData.substring(0, 100)); 
                 }
 
                 if (response.ok && data.success) {
@@ -182,7 +177,7 @@
                 loadingEl.innerHTML = `
                     <div style="text-align:center; padding: 20px;">
                         <i class="fa fa-times-circle" style="font-size: 40px; color: #ea1d2c; margin-bottom:15px;"></i>
-                        <p style="color:#ea1d2c; font-weight:bold; font-size:1.1rem;">Erro ao gerar Pix</p>
+                        <p style="color:#ea1d2c; font-weight:bold; font-size:1.1rem;">Ops! Erro no Pagamento</p>
                         <p style="color:#555; font-size: 0.85rem; background:#fff0f0; padding:10px; border-radius:5px; border:1px solid #ffcccc; margin-top:10px;">${error.message}</p>
                         <button onclick="location.reload()" style="margin-top:15px; padding:10px 25px; border:none; background:#ea1d2c; color:white; border-radius:5px; cursor:pointer; font-weight:bold;">Tentar Novamente</button>
                     </div>
@@ -212,7 +207,6 @@
             }
         }
 
-        // --- 4. Copiar Código ---
         btnCopy.addEventListener('click', () => {
             pixTextEl.select();
             document.execCommand('copy');
@@ -224,7 +218,7 @@
             }, 2000);
         });
 
-        // --- 5. Status (Polling) ---
+        // --- 4. Polling ---
         function startPolling(transactionId) {
             if (!transactionId) return;
             const baseUrl = window.location.origin;
@@ -234,9 +228,8 @@
                     const res = await fetch(`${baseUrl}/api/check-status?id=${transactionId}`);
                     const statusData = await res.json();
                     
-                    // Verifica VÁRIOS status possíveis de sucesso
                     const status = (statusData.status || "").toUpperCase();
-                    if (statusData.paid || status === 'PAID' || status === 'APPROVED' || status === 'COMPLETED') {
+                    if (statusData.paid || status === 'PAID' || status === 'APPROVED') {
                         clearInterval(interval);
                         handlePaymentApproved();
                     }
@@ -257,7 +250,6 @@
             });
         }
 
-        // Inicia
         generatePix();
     });
 </script>
