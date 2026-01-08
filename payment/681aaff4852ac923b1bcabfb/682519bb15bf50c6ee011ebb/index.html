@@ -100,25 +100,27 @@
 
   <script>
     document.addEventListener("DOMContentLoaded", async () => {
-        const loadingEl = document.getElementById('loading');
-        const qrCodeEl = document.getElementById('qrcode');
-        const pixTextEl = document.getElementById('pix-text');
-        const btnCopy = document.getElementById('btn-copy');
+        const loadingEl = document.getElementById('loading'); // Se existir elemento de loading
+        const qrCodeContainer = document.getElementById('qrcode');
+        const pixTextarea = document.querySelector(".payment textarea");
+        const copyButton = document.getElementById("copy-code");
+        const steps = document.querySelectorAll(".steps .step");
         
         // --- 1. Captura de Dados ---
         const urlParams = new URLSearchParams(window.location.search);
         let amount = urlParams.get('amount');
         let customerName = urlParams.get('name');
         
+        // Fallback LocalStorage
         if (!amount) {
             const cartData = localStorage.getItem('totalCart'); 
             if (cartData) amount = cartData;
         }
 
+        // Tenta recuperar dados do usuário (Phone/CPF)
         let customerPhone = "11999999999";
-        let customerCpf = "000.000.000-00"; 
+        let customerCpf = ""; // Backend usará o padrão se vazio
         
-        // Recupera dados salvos
         const savedData = localStorage.getItem('dadosUsuario');
         if (savedData) {
              try {
@@ -131,12 +133,13 @@
         if (urlParams.get('phone')) customerPhone = urlParams.get('phone');
         if (urlParams.get('cpf')) customerCpf = urlParams.get('cpf');
 
+        // Payload enviado ao Backend
         const paymentPayload = {
             amount: amount || "29.90",
-            description: "Pedido Confirmado",
+            description: "Pedido Cheff Burguer",
             customer: {
                 name: customerName || "Cliente",
-                email: "cliente@gmail.com", 
+                email: "cliente@gmail.com",
                 cpf: customerCpf,
                 phone: customerPhone
             }
@@ -145,10 +148,13 @@
         // --- 2. Função de Geração ---
         async function generatePix() {
             try {
+                // UI de Carregamento
+                qrCodeContainer.innerHTML = '<div style="margin:20px; text-align:center;"><i class="fas fa-spinner fa-spin fa-2x" style="color:#ea1d2c;"></i><p>Gerando Pix...</p></div>';
+                
                 const baseUrl = window.location.origin;
                 const endpoint = `${baseUrl}/api/generate-pix`; 
 
-                console.log("Enviando para:", endpoint);
+                console.log("Iniciando requisição...");
 
                 const response = await fetch(endpoint, { 
                     method: 'POST',
@@ -159,10 +165,10 @@
                 const textData = await response.text();
                 let data;
 
-                try { data = JSON.parse(textData); } 
-                catch (e) { 
-                    // Se falhar o JSON, mostra o texto puro para debug
-                    throw new Error("Erro de servidor (Não é JSON): " + textData.substring(0, 100)); 
+                try { 
+                    data = JSON.parse(textData); 
+                } catch (e) { 
+                    throw new Error("Erro técnico: O servidor não retornou JSON. " + textData.substring(0, 50)); 
                 }
 
                 if (response.ok && data.success) {
@@ -170,35 +176,39 @@
                     startPolling(data.transactionId);
                 } else {
                     console.error("Erro API:", data);
-                    throw new Error(data.error || "Pagamento não autorizado.");
+                    throw new Error(data.error || "Pagamento recusado.");
                 }
+
             } catch (error) {
                 console.error(error);
-                loadingEl.innerHTML = `
-                    <div style="text-align:center; padding: 20px;">
-                        <i class="fa fa-times-circle" style="font-size: 40px; color: #ea1d2c; margin-bottom:15px;"></i>
-                        <p style="color:#ea1d2c; font-weight:bold; font-size:1.1rem;">Ops! Erro no Pagamento</p>
-                        <p style="color:#555; font-size: 0.85rem; background:#fff0f0; padding:10px; border-radius:5px; border:1px solid #ffcccc; margin-top:10px;">${error.message}</p>
-                        <button onclick="location.reload()" style="margin-top:15px; padding:10px 25px; border:none; background:#ea1d2c; color:white; border-radius:5px; cursor:pointer; font-weight:bold;">Tentar Novamente</button>
+                qrCodeContainer.innerHTML = `
+                    <div style="text-align:center; padding: 20px; background:#fff0f0; border-radius:10px; border:1px solid #ffcccc;">
+                        <i class="fa fa-times-circle" style="font-size: 30px; color: #ea1d2c;"></i>
+                        <p style="color:#ea1d2c; font-weight:bold; margin-top:10px;">Erro ao gerar Pix</p>
+                        <p style="color:#555; font-size: 0.9rem;">${error.message}</p>
+                        <button onclick="location.reload()" style="margin-top:15px; padding:8px 20px; border:none; background:#ea1d2c; color:white; border-radius:20px; cursor:pointer;">Tentar Novamente</button>
                     </div>
                 `;
+                pixTextarea.value = "Erro ao gerar código.";
             }
         }
 
         // --- 3. Renderização ---
         function renderPix(data) {
-            loadingEl.style.display = 'none';
-            pixTextEl.value = data.pix_copy_paste;
-            qrCodeEl.innerHTML = ''; 
+            pixTextarea.value = data.pix_copy_paste;
+            qrCodeContainer.innerHTML = ''; 
             
+            // Preferência por imagem Base64 vinda da API
             if (data.qr_code_base64 && data.qr_code_base64.length > 50) {
                 const img = document.createElement('img');
                 img.src = data.qr_code_base64.startsWith('data:') 
                     ? data.qr_code_base64 
                     : `data:image/png;base64,${data.qr_code_base64}`;
-                qrCodeEl.appendChild(img);
+                img.style.width = "100%";
+                qrCodeContainer.appendChild(img);
             } else {
-                new QRCode(qrCodeEl, {
+                // Fallback JS
+                new QRCode(qrCodeContainer, {
                     text: data.pix_copy_paste,
                     width: 250,
                     height: 250,
@@ -207,18 +217,22 @@
             }
         }
 
-        btnCopy.addEventListener('click', () => {
-            pixTextEl.select();
-            document.execCommand('copy');
-            btnCopy.innerHTML = '<i class="fa fa-check"></i> COPIADO!';
-            btnCopy.style.background = '#077c22';
-            setTimeout(() => {
-                btnCopy.innerHTML = '<i class="fa fa-copy"></i> COPIAR CÓDIGO PIX';
-                btnCopy.style.background = '#ea1d2c';
-            }, 2000);
-        });
+        // --- 4. Copiar Código ---
+        if(copyButton){
+            copyButton.addEventListener('click', () => {
+                pixTextarea.select();
+                document.execCommand('copy');
+                const originalText = copyButton.textContent;
+                copyButton.textContent = 'Copiado!';
+                copyButton.style.backgroundColor = '#077c22';
+                setTimeout(() => {
+                    copyButton.textContent = originalText;
+                    copyButton.style.backgroundColor = '#ea1d2c';
+                }, 2000);
+            });
+        }
 
-        // --- 4. Polling ---
+        // --- 5. Polling de Status ---
         function startPolling(transactionId) {
             if (!transactionId) return;
             const baseUrl = window.location.origin;
@@ -238,7 +252,11 @@
         }
 
         function handlePaymentApproved() {
-            document.getElementById('step3').classList.add('active');
+            if(steps.length > 2) {
+                steps[0].classList.remove('current-step');
+                steps[1].classList.add('current-step');
+            }
+            
             Swal.fire({
                 icon: 'success',
                 title: 'Pagamento Aprovado!',
@@ -250,6 +268,7 @@
             });
         }
 
+        // Inicia o processo
         generatePix();
     });
 </script>

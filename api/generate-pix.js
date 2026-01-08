@@ -1,49 +1,59 @@
 const fetch = require('node-fetch');
 
 module.exports = async (req, res) => {
-  // 1. Configurações de Segurança (CORS)
+  // 1. Configuração de CORS e Headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   res.setHeader('Cache-Control', 'no-store, max-age=0');
 
-  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
+  // 2. Validação das Chaves
+  const publicKey = process.env.ANUBIS_PUBLIC_KEY;
+  const secretKey = process.env.ANUBIS_SECRET_KEY;
+
+  if (!publicKey || !secretKey) {
+    return res.status(500).json({ error: 'Configuração de servidor incompleta (Chaves).' });
+  }
 
   try {
-    const publicKey = process.env.ANUBIS_PUBLIC_KEY;
-    const secretKey = process.env.ANUBIS_SECRET_KEY;
+    const { amount, customer } = req.body;
 
-    if (!publicKey || !secretKey) {
-      return res.status(500).json({ error: 'Configuração de API incompleta (Chaves).' });
+    // 3. Tratamento de Valor
+    let valueInCents = 0;
+    if (typeof amount === 'string') {
+      valueInCents = Math.round(parseFloat(amount.replace('R$', '').replace(/\./g, '').replace(',', '.')) * 100);
+    } else {
+      valueInCents = Math.round(amount * 100);
     }
 
-    const { amount, customer } = req.body;
-    
-    // Tratamento do Valor
-    let valueInCents = typeof amount === 'string' 
-      ? Math.round(parseFloat(amount.replace('R$', '').replace(/\./g, '').replace(',', '.')) * 100)
-      : Math.round(amount * 100);
-
-    // Tratamento do Telefone (DDI 55)
+    // 4. Tratamento do Telefone (DDI 55 Obrigatório)
     let rawPhone = (customer?.phone || "").replace(/\D/g, '');
-    if (rawPhone.length < 10) rawPhone = "11999999999";
-    if (!rawPhone.startsWith('55')) rawPhone = '55' + rawPhone;
+    if (rawPhone.length < 10) rawPhone = "11999999999"; 
+    // Garante o 55 do Brasil
+    if (!rawPhone.startsWith('55')) {
+        rawPhone = '55' + rawPhone;
+    }
 
-    // Tratamento do CPF (Usa seu CPF válido se necessário)
+    // 5. Tratamento do CPF (Usa o CPF que você validou se o do cliente falhar)
     let rawCpf = (customer?.cpf || "").replace(/\D/g, '');
     const cpfsInvalidos = ["12345678909", "11111111111", "00000000000", ""];
+    
     if (!rawCpf || rawCpf.length !== 11 || cpfsInvalidos.includes(rawCpf)) {
-         rawCpf = "97834989910"; 
+         rawCpf = "97834989910"; // SEU CPF VÁLIDO
     }
 
-    // E-mail Único
+    // E-mail único para evitar bloqueio de duplicidade
     const uniqueId = Math.floor(Date.now() / 1000);
     const email = customer?.email && customer.email.includes('@') 
         ? customer.email 
         : `cliente.${uniqueId}@gmail.com`;
 
-    // --- CORREÇÃO PRINCIPAL: PAYLOAD EM PASCALCASE (Maiúsculas) ---
-    // A API .NET exige chaves maiúsculas para reconhecer os campos
+    // 6. PAYLOAD EM PASCALCASE (Letras Maiúsculas)
+    // Isso resolve o erro "Phone field is required" em APIs .NET
     const payload = {
       Amount: valueInCents,
       PaymentMethod: "pix",
@@ -51,80 +61,92 @@ module.exports = async (req, res) => {
       Customer: {
         Name: customer?.name || 'Cliente Consumidor',
         Email: email,
-        Phone: rawPhone, // Agora enviado como 'Phone', o servidor vai ler!
+        Phone: rawPhone, // PascalCase: Phone
         Document: {
-          Type: "cpf",
+          Type: "cpf",   // Alguns gateways aceitam Type minusculo, mas keys maiusculas
           Number: rawCpf
         }
       },
-      Items: [{ 
-          Title: 'Pedido Confirmado',
+      Items: [
+        {
+          Title: 'Pedido Cheff Burguer',
           UnitPrice: valueInCents,
           Quantity: 1,
           Tangible: false
-      }],
-      Metadata: { 
-          ProviderName: "Checkout Oficial" 
+        }
+      ],
+      Metadata: {
+        ProviderName: "Checkout Próprio"
       },
       Pix: {
         ExpiresIn: 3600
       }
     };
 
-    console.log("Enviando Payload PascalCase:", JSON.stringify(payload));
+    console.log("Enviando Payload:", JSON.stringify(payload));
 
     const auth = Buffer.from(`${publicKey}:${secretKey}`).toString('base64');
-    
-    // URL SINGULAR (A que respondeu antes)
-    const response = await fetch('https://api2.anubispay.com.br/v1/payment-transaction/create', {
+
+    // 7. URL SINGULAR (A ÚNICA QUE FUNCIONA)
+    const apiResponse = await fetch('https://api2.anubispay.com.br/v1/payment-transaction/create', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Basic ${auth}`
+        'Authorization': `Basic ${auth}`,
+        'Accept': 'application/json'
       },
       body: JSON.stringify(payload)
     });
 
-    const text = await response.text();
-    
+    const text = await apiResponse.text();
+
+    // Verificação de Erro HTML (Gateway fora do ar ou URL errada)
     if (text.trim().startsWith('<')) {
-        return res.status(502).json({ error: 'Erro HTML no Gateway.' });
+        console.error("ERRO CRÍTICO (HTML):", text);
+        return res.status(502).json({ error: 'Erro de comunicação com o Gateway (Retornou HTML).' });
     }
 
     let data;
-    try { data = JSON.parse(text); } 
-    catch(e) { 
-        console.error("Texto recebido não é JSON:", text);
-        return res.status(500).json({ error: 'Resposta inválida do servidor.' }); 
+    try {
+      data = JSON.parse(text);
+    } catch (e) {
+      console.error("ERRO JSON:", text);
+      return res.status(500).json({ error: 'Resposta inválida da API.' });
     }
 
-    if (!response.ok) {
-        console.error("ERRO ANUBIS:", JSON.stringify(data));
-        
-        let errorMsg = "Pagamento Recusado";
-        if (data.errors) {
-            const keys = Object.keys(data.errors);
-            if (keys.length > 0) errorMsg = `${keys[0]}: ${data.errors[keys[0]]}`;
-        } else if (data.message) {
-            errorMsg = data.message;
-        }
+    if (apiResponse.ok) {
+      // Sucesso! Tenta pegar o Pix de campos PascalCase ou snake_case
+      const pixCode = data.PixCopyPaste || data.pix?.qrcode_text || data.qrcode_text || data.pix_code;
+      const qrImage = data.QRCodeBase64 || data.pix?.qrcode || data.qrcode || data.qrcode_base64;
+      const transactionId = data.Id || data.id;
 
-        return res.status(400).json({ 
-            error: errorMsg, 
-            details: data 
-        });
-    }
-
-    // Sucesso! Mapeia a resposta (que provavelmente virá em PascalCase também)
-    return res.status(200).json({
+      return res.status(200).json({
         success: true,
-        transactionId: data.Id || data.id,
-        pix_copy_paste: data.PixCopyPaste || data.pix?.qrcode_text || data.pix_code,
-        qr_code_base64: data.QRCodeBase64 || data.pix?.qrcode || data.qrcode
-    });
+        transactionId: transactionId,
+        pix_copy_paste: pixCode,
+        qr_code_base64: qrImage
+      });
+    } else {
+      console.error("ERRO API ANUBIS:", JSON.stringify(data));
+      
+      // Formata a mensagem de erro para exibir no frontend
+      let msg = "Falha no pagamento.";
+      if (data.errors) {
+          // Pega o primeiro erro da lista (ex: Customer.Phone is required)
+          const chaves = Object.keys(data.errors);
+          if (chaves.length > 0) msg = `${chaves[0]}: ${data.errors[chaves[0]]}`;
+      } else if (data.message) {
+          msg = data.message;
+      }
 
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: 'Erro interno: ' + err.message });
+      return res.status(400).json({
+        error: msg,
+        details: data
+      });
+    }
+
+  } catch (error) {
+    console.error("ERRO INTERNO:", error);
+    return res.status(500).json({ error: 'Erro interno no servidor Vercel.' });
   }
 };
