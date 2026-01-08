@@ -1,114 +1,106 @@
 const fetch = require('node-fetch');
 
 module.exports = async (req, res) => {
-  // Configuração de CORS
+  // Configuração CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.setHeader('Cache-Control', 'no-store, max-age=0');
-
+  
   if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
 
   try {
     const publicKey = process.env.ANUBIS_PUBLIC_KEY;
     const secretKey = process.env.ANUBIS_SECRET_KEY;
 
     if (!publicKey || !secretKey) {
-      console.error("Credenciais ausentes");
-      return res.status(500).json({ error: 'Erro de configuração do servidor (Credenciais).' });
+      return res.status(500).json({ error: 'Erro de configuração (Chaves).' });
     }
 
-    const { amount, customer, items } = req.body;
+    const { amount, customer } = req.body;
+    
+    // Tratamento de Valor
+    let valueInCents = typeof amount === 'string' 
+      ? Math.round(parseFloat(amount.replace('R$', '').replace(/\./g, '').replace(',', '.')) * 100)
+      : Math.round(amount * 100);
 
-    // Tratamento do Valor
-    let valueInCents = 0;
-    if (typeof amount === 'string') {
-      valueInCents = Math.round(parseFloat(amount.replace('R$', '').replace(/\./g, '').replace(',', '.')) * 100);
-    } else {
-      valueInCents = Math.round(amount * 100);
-    }
-
-    // Tratamento Robusto do Telefone (A Anubis exige este campo)
-    // Se não vier do frontend, usa um padrão '11999999999'
-    let phoneToSend = '11999999999';
+    // --- CORREÇÃO DO TELEFONE (FORÇADA) ---
+    // Se o cliente não mandar telefone, usa o meu padrão.
+    // A AnubisPay EXIGE esse campo preenchido.
+    let finalPhone = "11999999999"; 
+    
     if (customer && customer.phone) {
-        // Remove tudo que não for número
-        const cleanPhone = customer.phone.replace(/\D/g, '');
-        // Verifica se tem tamanho mínimo de um telefone BR (10 ou 11 dígitos)
-        if (cleanPhone.length >= 10) {
-            phoneToSend = cleanPhone;
-        }
+        // Limpa e deixa só números
+        const clean = customer.phone.replace(/\D/g, '');
+        if (clean.length >= 10) finalPhone = clean;
     }
 
-    const auth = Buffer.from(`${publicKey}:${secretKey}`).toString('base64');
-
-    const apiPayload = {
+    const payload = {
       amount: valueInCents,
       payment_method: 'pix',
       postback_url: "https://webhook.site/d69ba6ed-3b46-40eb-9e9f-15e66a57161d",
       customer: {
         name: customer?.name || 'Cliente Visitante',
         email: customer?.email || 'cliente@email.com',
-        // AQUI ESTÁ A CORREÇÃO CRÍTICA:
-        phone: phoneToSend, 
+        phone: finalPhone, // Aqui vai o telefone garantido
         document: {
           type: 'cpf',
-          // Garante apenas números no CPF
           number: customer?.cpf?.replace(/\D/g, '') || '12345678909'
         }
       },
-      items: items || [{ title: 'Pedido Online', unit_price: valueInCents, quantity: 1, tangible: false }],
-      metadata: { provider_name: "Checkout Vercel" }
+      items: [{ 
+          title: 'Pedido Online',
+          unit_price: valueInCents,
+          quantity: 1,
+          tangible: false
+      }],
+      metadata: { provider: "Vercel Checkout" }
     };
 
-    console.log("Enviando para Anubis:", JSON.stringify(apiPayload));
+    // Log para você conferir no painel da Vercel > Logs
+    console.log("PAYLOAD ENVIADO PARA ANUBIS:", JSON.stringify(payload));
 
-    const apiResponse = await fetch('https://api2.anubispay.com.br/v1/payment-transaction/create', {
+    const auth = Buffer.from(`${publicKey}:${secretKey}`).toString('base64');
+    
+    const response = await fetch('https://api2.anubispay.com.br/v1/payment-transaction/create', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Basic ${auth}`,
-        'Accept': 'application/json'
+        'Authorization': `Basic ${auth}`
       },
-      body: JSON.stringify(apiPayload)
+      body: JSON.stringify(payload)
     });
 
-    const responseText = await apiResponse.text();
-
-    // Verificação de segurança para erro HTML
-    if (responseText.trim().startsWith('<')) {
-      return res.status(502).json({ error: 'Erro na operadora.', details: 'A API retornou HTML em vez de JSON.' });
+    const text = await response.text();
+    
+    // Verificação de Erro HTML
+    if (text.trim().startsWith('<')) {
+        console.error("ERRO HTML ANUBIS:", text);
+        return res.status(502).json({ error: 'Erro na API Anubis (HTML retornado).' });
     }
 
     let data;
-    try {
-      data = JSON.parse(responseText);
-    } catch (e) {
-      return res.status(500).json({ error: 'Resposta inválida da API.' });
+    try { data = JSON.parse(text); } catch(e) { 
+        return res.status(500).json({ error: 'Resposta inválida.' }); 
     }
 
-    if (apiResponse.ok) {
-      const pixCode = data.pix?.qrcode_text || data.qrcode_text || data.pix_code || data.PixCopyPaste;
-      const qrImage = data.pix?.qrcode || data.qrcode || data.qrcode_base64;
-      const transactionId = data.Id || data.id || data.transaction_id;
+    if (!response.ok) {
+        console.error("ERRO ANUBIS JSON:", data);
+        return res.status(response.status).json({ 
+            error: 'Erro na AnubisPay', 
+            details: data // Isso vai mostrar o erro exato na sua tela
+        });
+    }
 
-      return res.status(200).json({
+    // Sucesso
+    return res.status(200).json({
         success: true,
-        transactionId: transactionId,
-        pix_copy_paste: pixCode,
-        qr_code_base64: qrImage
-      });
-    } else {
-      console.error("Erro Anubis:", data);
-      return res.status(apiResponse.status).json({
-        error: data.message || 'Falha ao processar pagamento na AnubisPay.',
-        details: data // Envia o erro exato para o frontend
-      });
-    }
+        transactionId: data.Id || data.id,
+        pix_copy_paste: data.pix?.qrcode_text || data.qrcode_text || data.pix_code,
+        qr_code_base64: data.pix?.qrcode || data.qrcode
+    });
 
-  } catch (error) {
-    console.error("Erro Interno:", error);
-    return res.status(500).json({ error: 'Erro interno: ' + error.message });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: err.message });
   }
 };
