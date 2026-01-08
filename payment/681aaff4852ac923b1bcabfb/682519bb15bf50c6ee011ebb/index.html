@@ -105,50 +105,52 @@
         const pixTextEl = document.getElementById('pix-text');
         const btnCopy = document.getElementById('btn-copy');
         
-        // --- 1. Captura de Dados (URL ou Cache) ---
+        // --- 1. Captura de Dados ---
         const urlParams = new URLSearchParams(window.location.search);
         let amount = urlParams.get('amount');
         let customerName = urlParams.get('name');
-        let customerPhone = urlParams.get('phone');
-        let customerCpf = urlParams.get('cpf');
-
-        // Se não veio na URL, tenta pegar do LocalStorage
+        
+        // Tenta pegar do LocalStorage se URL falhar
         if (!amount) {
             const cartData = localStorage.getItem('totalCart'); 
             if (cartData) amount = cartData;
         }
 
-        // Tenta recuperar dados salvos do usuário
-        if (!customerPhone || !customerCpf) {
-             const savedData = localStorage.getItem('dadosUsuario');
-             if (savedData) {
-                 try {
-                     const parsed = JSON.parse(savedData);
-                     if (!customerPhone) customerPhone = parsed.telefone || parsed.phone;
-                     if (!customerCpf) customerCpf = parsed.cpf || parsed.document;
-                 } catch(e) {}
-             }
+        // Recupera dados salvos ou define padrões
+        let customerPhone = "11999999999";
+        let customerCpf = "000.000.000-00"; // Backend vai substituir pelo seu válido
+        
+        const savedData = localStorage.getItem('dadosUsuario');
+        if (savedData) {
+             try {
+                 const parsed = JSON.parse(savedData);
+                 if (parsed.telefone) customerPhone = parsed.telefone;
+                 if (parsed.cpf) customerCpf = parsed.cpf;
+             } catch(e) {}
         }
+        
+        // Se veio na URL, tem prioridade
+        if (urlParams.get('phone')) customerPhone = urlParams.get('phone');
+        if (urlParams.get('cpf')) customerCpf = urlParams.get('cpf');
 
         const paymentPayload = {
             amount: amount || "29.90",
-            description: "Pedido Delivery",
+            description: "Pedido Confirmado",
             customer: {
                 name: customerName || "Cliente",
-                email: "cliente@exemplo.com", // O backend vai corrigir isso se precisar
-                cpf: customerCpf || "000.000.000-00", // O backend vai substituir pelo seu válido
-                phone: customerPhone || "11999999999" // O backend vai adicionar o 55
+                email: "cliente@gmail.com", 
+                cpf: customerCpf,
+                phone: customerPhone
             }
         };
 
-        // --- 2. Função Principal de Geração ---
+        // --- 2. Função de Geração ---
         async function generatePix() {
             try {
-                // Monta a URL da API automaticamente
                 const baseUrl = window.location.origin;
                 const endpoint = `${baseUrl}/api/generate-pix`; 
 
-                console.log("Enviando pedido para:", endpoint);
+                console.log("Enviando para:", endpoint);
 
                 const response = await fetch(endpoint, { 
                     method: 'POST',
@@ -162,23 +164,19 @@
                 const textData = await response.text();
                 let data;
 
-                // Tenta ler o JSON
-                try {
-                    data = JSON.parse(textData);
-                } catch (e) {
-                    console.error("Erro ao ler JSON:", textData);
-                    throw new Error("O servidor retornou um erro não legível (provavelmente HTML 500 ou 404).");
+                try { data = JSON.parse(textData); } 
+                catch (e) { 
+                    console.error("Resposta não-JSON:", textData);
+                    throw new Error("Erro de comunicação com o servidor."); 
                 }
 
                 if (response.ok && data.success) {
                     renderPix(data);
                     startPolling(data.transactionId);
                 } else {
-                    console.error("Erro da API:", data);
-                    // Mostra o erro exato que veio do backend
-                    throw new Error(data.error || "Erro desconhecido ao criar Pix.");
+                    console.error("Erro API:", data);
+                    throw new Error(data.error || "Pagamento não autorizado.");
                 }
-
             } catch (error) {
                 console.error(error);
                 loadingEl.innerHTML = `
@@ -192,13 +190,12 @@
             }
         }
 
-        // --- 3. Exibição na Tela ---
+        // --- 3. Renderização ---
         function renderPix(data) {
             loadingEl.style.display = 'none';
             pixTextEl.value = data.pix_copy_paste;
             qrCodeEl.innerHTML = ''; 
             
-            // Se veio imagem base64
             if (data.qr_code_base64 && data.qr_code_base64.length > 50) {
                 const img = document.createElement('img');
                 img.src = data.qr_code_base64.startsWith('data:') 
@@ -206,7 +203,6 @@
                     : `data:image/png;base64,${data.qr_code_base64}`;
                 qrCodeEl.appendChild(img);
             } else {
-                // Fallback: Gera QR Code localmente
                 new QRCode(qrCodeEl, {
                     text: data.pix_copy_paste,
                     width: 250,
@@ -216,7 +212,7 @@
             }
         }
 
-        // --- 4. Botão Copiar ---
+        // --- 4. Copiar Código ---
         btnCopy.addEventListener('click', () => {
             pixTextEl.select();
             document.execCommand('copy');
@@ -228,7 +224,7 @@
             }, 2000);
         });
 
-        // --- 5. Verificação de Status (Polling) ---
+        // --- 5. Status (Polling) ---
         function startPolling(transactionId) {
             if (!transactionId) return;
             const baseUrl = window.location.origin;
@@ -237,20 +233,19 @@
                 try {
                     const res = await fetch(`${baseUrl}/api/check-status?id=${transactionId}`);
                     const statusData = await res.json();
-
-                    if (statusData.paid || statusData.status === 'PAID') {
+                    
+                    // Verifica VÁRIOS status possíveis de sucesso
+                    const status = (statusData.status || "").toUpperCase();
+                    if (statusData.paid || status === 'PAID' || status === 'APPROVED' || status === 'COMPLETED') {
                         clearInterval(interval);
                         handlePaymentApproved();
                     }
-                } catch (e) {
-                    // Silencioso enquanto aguarda
-                }
+                } catch (e) {}
             }, 5000); 
         }
 
         function handlePaymentApproved() {
             document.getElementById('step3').classList.add('active');
-            
             Swal.fire({
                 icon: 'success',
                 title: 'Pagamento Aprovado!',
