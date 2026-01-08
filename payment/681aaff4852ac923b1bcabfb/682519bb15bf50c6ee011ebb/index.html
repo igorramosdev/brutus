@@ -101,11 +101,9 @@
   <script>
     document.addEventListener("DOMContentLoaded", async () => {
         // Seletores seguros
-        const loadingEl = document.getElementById('loading');
         const qrCodeContainer = document.getElementById('qrcode');
-        // Tenta encontrar o textarea de várias formas para evitar o erro 'null'
-        const pixTextarea = document.querySelector(".payment textarea") || document.querySelector("textarea");
-        const copyButton = document.getElementById("copy-code") || document.getElementById("btn-copy");
+        const pixTextarea = document.querySelector(".payment textarea");
+        const copyButton = document.getElementById("copy-code");
         const steps = document.querySelectorAll(".steps .step");
         
         // --- 1. Captura de Dados ---
@@ -113,13 +111,11 @@
         let amount = urlParams.get('amount');
         let customerName = urlParams.get('name');
         
-        // Fallback LocalStorage
         if (!amount) {
             const cartData = localStorage.getItem('totalCart'); 
             if (cartData) amount = cartData;
         }
 
-        // Recupera dados do usuário (Phone/CPF)
         let customerPhone = "11999999999";
         let customerCpf = ""; 
         
@@ -149,14 +145,15 @@
         // --- 2. Função de Geração ---
         async function generatePix() {
             try {
+                // LIMPA O CONTAINER ANTES DE COMEÇAR (Corrige erro visual)
                 if(qrCodeContainer) {
-                    qrCodeContainer.innerHTML = '<div style="margin:20px; text-align:center;"><p>Gerando Pix...</p></div>';
+                    qrCodeContainer.innerHTML = '<div style="margin:20px; text-align:center;"><i class="fas fa-spinner fa-spin" style="color:#ea1d2c;"></i><p>Gerando Pix...</p></div>';
                 }
                 
                 const baseUrl = window.location.origin;
                 const endpoint = `${baseUrl}/api/generate-pix`; 
 
-                console.log("Iniciando requisição...");
+                console.log("Enviando...");
 
                 const response = await fetch(endpoint, { 
                     method: 'POST',
@@ -167,23 +164,26 @@
                 const textData = await response.text();
                 let data;
 
-                try { 
-                    data = JSON.parse(textData); 
-                } catch (e) { 
-                    throw new Error("Erro técnico: O servidor não retornou JSON. " + textData.substring(0, 50)); 
-                }
+                try { data = JSON.parse(textData); } 
+                catch (e) { throw new Error("Erro técnico no servidor."); }
 
                 if (response.ok && data.success) {
                     renderPix(data);
                     startPolling(data.transactionId);
                 } else {
                     console.error("Erro API:", data);
-                    throw new Error(data.error || "Pagamento recusado.");
+                    // Pega mensagem de erro detalhada se existir
+                    let msg = data.error;
+                    if(data.details && data.details.message) msg = data.details.message;
+                    if(data.details && data.details.error) msg = data.details.error;
+                    
+                    throw new Error(msg || "Pagamento recusado.");
                 }
 
             } catch (error) {
                 console.error(error);
                 if (qrCodeContainer) {
+                    // LIMPA NOVAMENTE PARA NÃO DUPLICAR
                     qrCodeContainer.innerHTML = `
                         <div style="text-align:center; padding: 20px; background:#fff0f0; border-radius:10px; border:1px solid #ffcccc;">
                             <p style="color:#ea1d2c; font-weight:bold;">Erro ao gerar Pix</p>
@@ -192,7 +192,7 @@
                         </div>
                     `;
                 }
-                if (pixTextarea) pixTextarea.value = "Erro ao gerar código.";
+                if (pixTextarea) pixTextarea.value = "Erro.";
             }
         }
 
@@ -200,7 +200,7 @@
         function renderPix(data) {
             if (pixTextarea) pixTextarea.value = data.pix_copy_paste;
             if (qrCodeContainer) {
-                qrCodeContainer.innerHTML = ''; 
+                qrCodeContainer.innerHTML = ''; // LIMPA LOADING
                 
                 if (data.qr_code_base64 && data.qr_code_base64.length > 50) {
                     const img = document.createElement('img');
@@ -235,7 +235,7 @@
             });
         }
 
-        // --- 5. Polling de Status ---
+        // --- 5. Polling ---
         function startPolling(transactionId) {
             if (!transactionId) return;
             const baseUrl = window.location.origin;
@@ -245,8 +245,7 @@
                     const res = await fetch(`${baseUrl}/api/check-status?id=${transactionId}`);
                     const statusData = await res.json();
                     
-                    const status = (statusData.status || "").toUpperCase();
-                    if (statusData.paid || status === 'PAID' || status === 'APPROVED') {
+                    if (statusData.paid || statusData.status === 'PAID' || statusData.status === 'APPROVED') {
                         clearInterval(interval);
                         handlePaymentApproved();
                     }
@@ -271,7 +270,7 @@
             });
         }
 
-        // Inicia o processo
+        // Inicia
         generatePix();
     });
 </script>
