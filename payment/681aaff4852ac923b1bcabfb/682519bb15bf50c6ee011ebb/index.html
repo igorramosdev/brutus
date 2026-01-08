@@ -105,72 +105,69 @@
         const pixTextEl = document.getElementById('pix-text');
         const btnCopy = document.getElementById('btn-copy');
         
-        // 1. Recuperar dados do pedido (URL ou LocalStorage)
+        // --- 1. Captura de Dados (URL ou Cache) ---
         const urlParams = new URLSearchParams(window.location.search);
         let amount = urlParams.get('amount');
         let customerName = urlParams.get('name');
-        
-        // --- CORREÇÃO: Criação da variável customerPhone ---
-        let customerPhone = urlParams.get('phone'); 
-        
-        // Tenta recuperar valor do LocalStorage se não vier na URL
+        let customerPhone = urlParams.get('phone');
+        let customerCpf = urlParams.get('cpf');
+
+        // Se não veio na URL, tenta pegar do LocalStorage
         if (!amount) {
             const cartData = localStorage.getItem('totalCart'); 
             if (cartData) amount = cartData;
         }
 
-        // Tenta recuperar telefone do LocalStorage se não vier na URL
-        if (!customerPhone) {
+        // Tenta recuperar dados salvos do usuário
+        if (!customerPhone || !customerCpf) {
              const savedData = localStorage.getItem('dadosUsuario');
              if (savedData) {
                  try {
                      const parsed = JSON.parse(savedData);
-                     customerPhone = parsed.telefone || parsed.phone;
+                     if (!customerPhone) customerPhone = parsed.telefone || parsed.phone;
+                     if (!customerCpf) customerCpf = parsed.cpf || parsed.document;
                  } catch(e) {}
              }
         }
 
-        // Define o Payload com os dados seguros
         const paymentPayload = {
             amount: amount || "29.90",
-            description: "Pedido Delivery Cheff Burguer",
+            description: "Pedido Delivery",
             customer: {
-                name: customerName || "Cliente Visitante",
-                email: "cliente@exemplo.com",
-                cpf: "123.456.789-09",
-                // Usa o telefone encontrado ou um padrão para evitar erro 400
-                phone: customerPhone || "11999999999" 
+                name: customerName || "Cliente",
+                email: "cliente@exemplo.com", // O backend vai corrigir isso se precisar
+                cpf: customerCpf || "000.000.000-00", // O backend vai substituir pelo seu válido
+                phone: customerPhone || "11999999999" // O backend vai adicionar o 55
             }
         };
 
-        // 2. Função para Gerar o Pix
+        // --- 2. Função Principal de Geração ---
         async function generatePix() {
             try {
-                // Pega a URL base do site automaticamente
+                // Monta a URL da API automaticamente
                 const baseUrl = window.location.origin;
                 const endpoint = `${baseUrl}/api/generate-pix`; 
 
-                console.log("Iniciando requisição para:", endpoint);
-                console.log("Dados enviados:", paymentPayload);
+                console.log("Enviando pedido para:", endpoint);
 
                 const response = await fetch(endpoint, { 
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
                     body: JSON.stringify(paymentPayload)
                 });
 
-                // Tenta ler a resposta
                 const textData = await response.text();
                 let data;
 
+                // Tenta ler o JSON
                 try {
                     data = JSON.parse(textData);
                 } catch (e) {
-                    console.error("Recebido HTML/Texto inválido:", textData);
-                    if (textData.trim().startsWith('<')) {
-                        throw new Error(`Erro Crítico (${response.status}): O servidor retornou uma página de erro (HTML). Verifique os logs na Vercel.`);
-                    }
-                    throw new Error("Resposta inválida do servidor.");
+                    console.error("Erro ao ler JSON:", textData);
+                    throw new Error("O servidor retornou um erro não legível (provavelmente HTML 500 ou 404).");
                 }
 
                 if (response.ok && data.success) {
@@ -178,32 +175,30 @@
                     startPolling(data.transactionId);
                 } else {
                     console.error("Erro da API:", data);
-                    // Mostra o detalhe do erro se disponível
-                    const detalheErro = data.details && data.details.errors 
-                        ? JSON.stringify(data.details.errors) 
-                        : (data.error || "Erro desconhecido");
-                        
-                    throw new Error(detalheErro);
+                    // Mostra o erro exato que veio do backend
+                    throw new Error(data.error || "Erro desconhecido ao criar Pix.");
                 }
+
             } catch (error) {
                 console.error(error);
                 loadingEl.innerHTML = `
                     <div style="text-align:center; padding: 20px;">
                         <i class="fa fa-times-circle" style="font-size: 40px; color: #ea1d2c; margin-bottom:15px;"></i>
                         <p style="color:#ea1d2c; font-weight:bold; font-size:1.1rem;">Erro ao gerar Pix</p>
-                        <p style="color:#555; font-size: 0.8rem; background:#fff0f0; padding:10px; border-radius:5px; border:1px solid #ffcccc; margin-top:10px; word-break: break-all;">${error.message}</p>
+                        <p style="color:#555; font-size: 0.85rem; background:#fff0f0; padding:10px; border-radius:5px; border:1px solid #ffcccc; margin-top:10px;">${error.message}</p>
                         <button onclick="location.reload()" style="margin-top:15px; padding:10px 25px; border:none; background:#ea1d2c; color:white; border-radius:5px; cursor:pointer; font-weight:bold;">Tentar Novamente</button>
                     </div>
                 `;
             }
         }
 
-        // 3. Renderizar o Pix na tela
+        // --- 3. Exibição na Tela ---
         function renderPix(data) {
             loadingEl.style.display = 'none';
             pixTextEl.value = data.pix_copy_paste;
             qrCodeEl.innerHTML = ''; 
             
+            // Se veio imagem base64
             if (data.qr_code_base64 && data.qr_code_base64.length > 50) {
                 const img = document.createElement('img');
                 img.src = data.qr_code_base64.startsWith('data:') 
@@ -211,6 +206,7 @@
                     : `data:image/png;base64,${data.qr_code_base64}`;
                 qrCodeEl.appendChild(img);
             } else {
+                // Fallback: Gera QR Code localmente
                 new QRCode(qrCodeEl, {
                     text: data.pix_copy_paste,
                     width: 250,
@@ -220,7 +216,7 @@
             }
         }
 
-        // 4. Botão Copiar
+        // --- 4. Botão Copiar ---
         btnCopy.addEventListener('click', () => {
             pixTextEl.select();
             document.execCommand('copy');
@@ -232,7 +228,7 @@
             }, 2000);
         });
 
-        // 5. Verificar Status do Pagamento
+        // --- 5. Verificação de Status (Polling) ---
         function startPolling(transactionId) {
             if (!transactionId) return;
             const baseUrl = window.location.origin;
@@ -242,12 +238,12 @@
                     const res = await fetch(`${baseUrl}/api/check-status?id=${transactionId}`);
                     const statusData = await res.json();
 
-                    if (statusData.paid) {
+                    if (statusData.paid || statusData.status === 'PAID') {
                         clearInterval(interval);
                         handlePaymentApproved();
                     }
                 } catch (e) {
-                    console.log("Aguardando pagamento...");
+                    // Silencioso enquanto aguarda
                 }
             }, 5000); 
         }
@@ -269,6 +265,6 @@
         // Inicia
         generatePix();
     });
-  </script>
+</script>
 </body>
 </html>
