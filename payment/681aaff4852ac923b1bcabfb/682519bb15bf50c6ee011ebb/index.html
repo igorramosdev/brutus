@@ -100,10 +100,12 @@
 
   <script>
     document.addEventListener("DOMContentLoaded", async () => {
-        const loadingEl = document.getElementById('loading'); // Se existir elemento de loading
+        // Seletores seguros
+        const loadingEl = document.getElementById('loading');
         const qrCodeContainer = document.getElementById('qrcode');
-        const pixTextarea = document.querySelector(".payment textarea");
-        const copyButton = document.getElementById("copy-code");
+        // Tenta encontrar o textarea de várias formas para evitar o erro 'null'
+        const pixTextarea = document.querySelector(".payment textarea") || document.querySelector("textarea");
+        const copyButton = document.getElementById("copy-code") || document.getElementById("btn-copy");
         const steps = document.querySelectorAll(".steps .step");
         
         // --- 1. Captura de Dados ---
@@ -117,9 +119,9 @@
             if (cartData) amount = cartData;
         }
 
-        // Tenta recuperar dados do usuário (Phone/CPF)
+        // Recupera dados do usuário (Phone/CPF)
         let customerPhone = "11999999999";
-        let customerCpf = ""; // Backend usará o padrão se vazio
+        let customerCpf = ""; 
         
         const savedData = localStorage.getItem('dadosUsuario');
         if (savedData) {
@@ -133,10 +135,9 @@
         if (urlParams.get('phone')) customerPhone = urlParams.get('phone');
         if (urlParams.get('cpf')) customerCpf = urlParams.get('cpf');
 
-        // Payload enviado ao Backend
         const paymentPayload = {
             amount: amount || "29.90",
-            description: "Pedido Cheff Burguer",
+            description: "Pedido Confirmado",
             customer: {
                 name: customerName || "Cliente",
                 email: "cliente@gmail.com",
@@ -148,8 +149,9 @@
         // --- 2. Função de Geração ---
         async function generatePix() {
             try {
-                // UI de Carregamento
-                qrCodeContainer.innerHTML = '<div style="margin:20px; text-align:center;"><i class="fas fa-spinner fa-spin fa-2x" style="color:#ea1d2c;"></i><p>Gerando Pix...</p></div>';
+                if(qrCodeContainer) {
+                    qrCodeContainer.innerHTML = '<div style="margin:20px; text-align:center;"><p>Gerando Pix...</p></div>';
+                }
                 
                 const baseUrl = window.location.origin;
                 const endpoint = `${baseUrl}/api/generate-pix`; 
@@ -181,44 +183,45 @@
 
             } catch (error) {
                 console.error(error);
-                qrCodeContainer.innerHTML = `
-                    <div style="text-align:center; padding: 20px; background:#fff0f0; border-radius:10px; border:1px solid #ffcccc;">
-                        <i class="fa fa-times-circle" style="font-size: 30px; color: #ea1d2c;"></i>
-                        <p style="color:#ea1d2c; font-weight:bold; margin-top:10px;">Erro ao gerar Pix</p>
-                        <p style="color:#555; font-size: 0.9rem;">${error.message}</p>
-                        <button onclick="location.reload()" style="margin-top:15px; padding:8px 20px; border:none; background:#ea1d2c; color:white; border-radius:20px; cursor:pointer;">Tentar Novamente</button>
-                    </div>
-                `;
-                pixTextarea.value = "Erro ao gerar código.";
+                if (qrCodeContainer) {
+                    qrCodeContainer.innerHTML = `
+                        <div style="text-align:center; padding: 20px; background:#fff0f0; border-radius:10px; border:1px solid #ffcccc;">
+                            <p style="color:#ea1d2c; font-weight:bold;">Erro ao gerar Pix</p>
+                            <p style="color:#555; font-size: 0.9rem;">${error.message}</p>
+                            <button onclick="location.reload()" style="margin-top:15px; padding:8px 20px; border:none; background:#ea1d2c; color:white; border-radius:20px; cursor:pointer;">Tentar Novamente</button>
+                        </div>
+                    `;
+                }
+                if (pixTextarea) pixTextarea.value = "Erro ao gerar código.";
             }
         }
 
         // --- 3. Renderização ---
         function renderPix(data) {
-            pixTextarea.value = data.pix_copy_paste;
-            qrCodeContainer.innerHTML = ''; 
-            
-            // Preferência por imagem Base64 vinda da API
-            if (data.qr_code_base64 && data.qr_code_base64.length > 50) {
-                const img = document.createElement('img');
-                img.src = data.qr_code_base64.startsWith('data:') 
-                    ? data.qr_code_base64 
-                    : `data:image/png;base64,${data.qr_code_base64}`;
-                img.style.width = "100%";
-                qrCodeContainer.appendChild(img);
-            } else {
-                // Fallback JS
-                new QRCode(qrCodeContainer, {
-                    text: data.pix_copy_paste,
-                    width: 250,
-                    height: 250,
-                    correctLevel: QRCode.CorrectLevel.L
-                });
+            if (pixTextarea) pixTextarea.value = data.pix_copy_paste;
+            if (qrCodeContainer) {
+                qrCodeContainer.innerHTML = ''; 
+                
+                if (data.qr_code_base64 && data.qr_code_base64.length > 50) {
+                    const img = document.createElement('img');
+                    img.src = data.qr_code_base64.startsWith('data:') 
+                        ? data.qr_code_base64 
+                        : `data:image/png;base64,${data.qr_code_base64}`;
+                    img.style.width = "100%";
+                    qrCodeContainer.appendChild(img);
+                } else {
+                    new QRCode(qrCodeContainer, {
+                        text: data.pix_copy_paste,
+                        width: 250,
+                        height: 250,
+                        correctLevel: QRCode.CorrectLevel.L
+                    });
+                }
             }
         }
 
         // --- 4. Copiar Código ---
-        if(copyButton){
+        if(copyButton && pixTextarea){
             copyButton.addEventListener('click', () => {
                 pixTextarea.select();
                 document.execCommand('copy');
@@ -252,7 +255,7 @@
         }
 
         function handlePaymentApproved() {
-            if(steps.length > 2) {
+            if(steps && steps.length > 1) {
                 steps[0].classList.remove('current-step');
                 steps[1].classList.add('current-step');
             }

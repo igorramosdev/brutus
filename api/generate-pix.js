@@ -7,22 +7,19 @@ module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   res.setHeader('Cache-Control', 'no-store, max-age=0');
 
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
-  // 2. Validação das Chaves
-  const publicKey = process.env.ANUBIS_PUBLIC_KEY;
-  const secretKey = process.env.ANUBIS_SECRET_KEY;
-
-  if (!publicKey || !secretKey) {
-    return res.status(500).json({ error: 'Configuração de servidor incompleta (Chaves).' });
-  }
+  if (req.method === 'OPTIONS') return res.status(200).end();
 
   try {
+    const publicKey = process.env.ANUBIS_PUBLIC_KEY;
+    const secretKey = process.env.ANUBIS_SECRET_KEY;
+
+    if (!publicKey || !secretKey) {
+      return res.status(500).json({ error: 'Chaves de API não configuradas na Vercel.' });
+    }
+
     const { amount, customer } = req.body;
 
-    // 3. Tratamento de Valor
+    // 2. Tratamento do Valor
     let valueInCents = 0;
     if (typeof amount === 'string') {
       valueInCents = Math.round(parseFloat(amount.replace('R$', '').replace(/\./g, '').replace(',', '.')) * 100);
@@ -30,65 +27,60 @@ module.exports = async (req, res) => {
       valueInCents = Math.round(amount * 100);
     }
 
-    // 4. Tratamento do Telefone (DDI 55 Obrigatório)
+    // 3. Tratamento do Telefone (DDI 55 + Apenas Números)
     let rawPhone = (customer?.phone || "").replace(/\D/g, '');
     if (rawPhone.length < 10) rawPhone = "11999999999"; 
-    // Garante o 55 do Brasil
-    if (!rawPhone.startsWith('55')) {
-        rawPhone = '55' + rawPhone;
-    }
+    if (!rawPhone.startsWith('55')) rawPhone = '55' + rawPhone;
 
-    // 5. Tratamento do CPF (Usa o CPF que você validou se o do cliente falhar)
+    // 4. Tratamento do CPF (Usa o seu CPF validado se o do cliente falhar)
     let rawCpf = (customer?.cpf || "").replace(/\D/g, '');
     const cpfsInvalidos = ["12345678909", "11111111111", "00000000000", ""];
     
     if (!rawCpf || rawCpf.length !== 11 || cpfsInvalidos.includes(rawCpf)) {
-         rawCpf = "97834989910"; // SEU CPF VÁLIDO
+         rawCpf = "97834989910"; // CPF Válido para aprovação
     }
 
-    // E-mail único para evitar bloqueio de duplicidade
+    // E-mail único
     const uniqueId = Math.floor(Date.now() / 1000);
     const email = customer?.email && customer.email.includes('@') 
         ? customer.email 
         : `cliente.${uniqueId}@gmail.com`;
 
-    // 6. PAYLOAD EM PASCALCASE (Letras Maiúsculas)
-    // Isso resolve o erro "Phone field is required" em APIs .NET
+    // 5. PAYLOAD CORRIGIDO (Raiz snake_case, Interno PascalCase)
+    // Isso resolve o erro "The Phone field is required"
     const payload = {
-      Amount: valueInCents,
-      PaymentMethod: "pix",
-      PostbackUrl: "https://webhook.site/d69ba6ed-3b46-40eb-9e9f-15e66a57161d",
-      Customer: {
-        Name: customer?.name || 'Cliente Consumidor',
-        Email: email,
-        Phone: rawPhone, // PascalCase: Phone
-        Document: {
-          Type: "cpf",   // Alguns gateways aceitam Type minusculo, mas keys maiusculas
-          Number: rawCpf
+      amount: valueInCents,           // minúsculo
+      payment_method: "pix",          // minúsculo
+      postback_url: "https://webhook.site/d69ba6ed-3b46-40eb-9e9f-15e66a57161d",
+      metadata: { provider_name: "Checkout Vercel" },
+      customer: {                     // minúsculo
+        Name: customer?.name || 'Cliente Consumidor', // Maiúsculo
+        Email: email,                 // Maiúsculo
+        Phone: rawPhone,              // Maiúsculo (O Validador exige isso)
+        Document: {                   // Maiúsculo
+          Type: "cpf",                // Maiúsculo
+          Number: rawCpf              // Maiúsculo
         }
       },
-      Items: [
+      items: [
         {
-          Title: 'Pedido Cheff Burguer',
-          UnitPrice: valueInCents,
-          Quantity: 1,
-          Tangible: false
+          title: 'Pedido Confirmado',
+          unit_price: valueInCents,
+          quantity: 1,
+          tangible: false
         }
       ],
-      Metadata: {
-        ProviderName: "Checkout Próprio"
-      },
-      Pix: {
-        ExpiresIn: 3600
+      pix: {
+        expires_in: 3600
       }
     };
 
-    console.log("Enviando Payload:", JSON.stringify(payload));
+    console.log("Enviando Payload Híbrido:", JSON.stringify(payload));
 
     const auth = Buffer.from(`${publicKey}:${secretKey}`).toString('base64');
 
-    // 7. URL SINGULAR (A ÚNICA QUE FUNCIONA)
-    const apiResponse = await fetch('https://api2.anubispay.com.br/v1/payment-transaction/create', {
+    // 6. URL SINGULAR (A única que responde JSON corretamente)
+    const response = await fetch('https://api2.anubispay.com.br/v1/payment-transaction/create', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -98,24 +90,24 @@ module.exports = async (req, res) => {
       body: JSON.stringify(payload)
     });
 
-    const text = await apiResponse.text();
+    const text = await response.text();
 
-    // Verificação de Erro HTML (Gateway fora do ar ou URL errada)
+    // Verifica se retornou HTML (Erro 502/404 do Gateway)
     if (text.trim().startsWith('<')) {
-        console.error("ERRO CRÍTICO (HTML):", text);
-        return res.status(502).json({ error: 'Erro de comunicação com o Gateway (Retornou HTML).' });
+        console.error("ERRO HTML ANUBIS:", text);
+        return res.status(502).json({ error: 'Erro de comunicação com a AnubisPay (Gateway retornou HTML).' });
     }
 
     let data;
     try {
       data = JSON.parse(text);
     } catch (e) {
-      console.error("ERRO JSON:", text);
+      console.error("ERRO JSON PARSE:", text);
       return res.status(500).json({ error: 'Resposta inválida da API.' });
     }
 
-    if (apiResponse.ok) {
-      // Sucesso! Tenta pegar o Pix de campos PascalCase ou snake_case
+    if (response.ok) {
+      // Sucesso! Tenta pegar o Pix de qualquer campo possível
       const pixCode = data.PixCopyPaste || data.pix?.qrcode_text || data.qrcode_text || data.pix_code;
       const qrImage = data.QRCodeBase64 || data.pix?.qrcode || data.qrcode || data.qrcode_base64;
       const transactionId = data.Id || data.id;
@@ -127,12 +119,10 @@ module.exports = async (req, res) => {
         qr_code_base64: qrImage
       });
     } else {
-      console.error("ERRO API ANUBIS:", JSON.stringify(data));
+      console.error("ERRO API:", JSON.stringify(data));
       
-      // Formata a mensagem de erro para exibir no frontend
-      let msg = "Falha no pagamento.";
+      let msg = "Pagamento Recusado.";
       if (data.errors) {
-          // Pega o primeiro erro da lista (ex: Customer.Phone is required)
           const chaves = Object.keys(data.errors);
           if (chaves.length > 0) msg = `${chaves[0]}: ${data.errors[chaves[0]]}`;
       } else if (data.message) {
@@ -147,6 +137,6 @@ module.exports = async (req, res) => {
 
   } catch (error) {
     console.error("ERRO INTERNO:", error);
-    return res.status(500).json({ error: 'Erro interno no servidor Vercel.' });
+    return res.status(500).json({ error: 'Erro interno no servidor Vercel: ' + error.message });
   }
 };
