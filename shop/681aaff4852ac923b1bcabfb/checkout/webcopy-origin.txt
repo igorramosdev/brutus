@@ -1,0 +1,48 @@
+Uri: https://cdn.utmify.com.br/scripts/utms/latest.js
+File Name: C:\Downloaded Web Sites\cheffburguer.delivery\cheffburguer.delivery\scripts\utms\latest-1.js
+Content Type: text/javascript
+
+Uri: https://cheffburguer.delivery/css/delivry-25.css
+File Name: C:\Downloaded Web Sites\cheffburguer.delivery\cheffburguer.delivery\css\delivry-25-1.css
+Content Type: text/css
+
+Uri: https://cheffburguer.delivery/images/verified-check-svgrepo-com.svg
+File Name: C:\Downloaded Web Sites\cheffburguer.delivery\cheffburguer.delivery\images\verified-check-svgrepo-com-1.svg
+Content Type: image/svg+xml
+
+Uri: https://cheffburguer.delivery/product.js
+File Name: C:\Downloaded Web Sites\cheffburguer.delivery\cheffburguer.delivery\product-1.js
+Content Type: application/javascript
+
+Uri: https://cheffburguer.delivery/reclameaqui-assets/libraries/header/images/logo-mobile.svg
+File Name: C:\Downloaded Web Sites\cheffburguer.delivery\cheffburguer.delivery\reclameaqui-assets\libraries\header\images\logo-mobile-1.svg
+Content Type: image/svg+xml
+
+Uri: https://cheffburguer.delivery/shop/681aaff4852ac923b1bcabfb/checkout/index.htm
+File Name: C:\Downloaded Web Sites\cheffburguer.delivery\cheffburguer.delivery\shop\681aaff4852ac923b1bcabfb\checkout\index-1.htm
+Content Type: text/html
+
+Uri: https://cheffburguer.delivery/SN8gVgwk/logocheff.png
+File Name: C:\Downloaded Web Sites\cheffburguer.delivery\cheffburguer.delivery\SN8gVgwk\logocheff-1.png
+Content Type: image/png
+
+Uri: https://cheffburguer.delivery/whitecheckout/cdn/business/VCB2G6B18/reviews/iBmtS32flP0Ruibmk7H1L9rPavkkZ07LiYbUNWce.png
+File Name: C:\Downloaded Web Sites\cheffburguer.delivery\cheffburguer.delivery\whitecheckout\cdn\business\VCB2G6B18\reviews\iBmtS32flP0Ruibmk7H1L9rPavkkZ07LiYbUNWce-1.png
+Content Type: image/png
+
+Uri: https://cheffburguer.delivery/whitecheckout/cdn/business/VCB2G6B18/reviews/KStCsh2tKsKCF5daRrOAWdnMU4n83HbnnO5hXzJ7.jpg
+File Name: C:\Downloaded Web Sites\cheffburguer.delivery\cheffburguer.delivery\whitecheckout\cdn\business\VCB2G6B18\reviews\KStCsh2tKsKCF5daRrOAWdnMU4n83HbnnO5hXzJ7-1.jpg
+Content Type: image/jpeg
+
+Uri: https://i.ibb.co/d4cJNKJ0/1761874938117blob.webp
+File Name: C:\Downloaded Web Sites\cheffburguer.delivery\cheffburguer.delivery\d4cJNKJ0\1761874938117blob-1.webp
+Content Type: image/webp
+
+Uri: https://i.ibb.co/hqXP2qX/1761874938086blob.webp
+File Name: C:\Downloaded Web Sites\cheffburguer.delivery\cheffburguer.delivery\hqXP2qX\1761874938086blob-1.webp
+Content Type: image/webp
+
+Uri: https://i.ibb.co/mVDwQN39/banner-237f7496.webp
+File Name: C:\Downloaded Web Sites\cheffburguer.delivery\cheffburguer.delivery\mVDwQN39\banner-237f7496-1.webp
+Content Type: image/webp
+

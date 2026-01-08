@@ -1,0 +1,968 @@
+
+                <html>
+
+                <head>
+
+
+                  <meta http-equiv="content-type" content="text/html;charset=UTF-8">
+
+                  <meta charset="utf-8">
+                  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+                  <meta name="viewport" content="width=device-width, initial-scale=1">
+                  <link rel="shortcut icon" type="image/jpg"
+                    href="https://scontent.fgyn22-1.fna.fbcdn.net/v/t39.30808-6/487529998_1268865461423703_1918764225145965035_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=_JnDNq1AW4QQ7kNvwGY41GY&_nc_oc=AdmCm4242ZtBRMw1VG090S6p8Q363v7DtzokiZA9P0DItjz3CKwi_rxWeBV-HQaBYN8&_nc_zt=23&_nc_ht=scontent.fgyn22-1.fna&_nc_gid=Mwk1c33rVDonTU3hqDHxFw&oh=00_AfPWgYJjoxVWLSoNGAhbowHVG8qStnsB_vM-s6j4wtEd8g&oe=686C78E3">
+                  <title>Carrinho</title>
+                  <script>
+                    window.googlePixelId = "6939e6eb93ad351dc55b7088";
+                    var a = document.createElement("script");
+                    a.setAttribute("async", "");
+                    a.setAttribute("defer", "");
+                    a.setAttribute("src", "https://cdn.utmify.com.br/scripts/pixel/pixel-google.js");
+                    document.head.appendChild(a);
+                  </script>
+                  <script src="https://cdn.utmify.com.br/scripts/utms/latest.js" data-utmify-prevent-xcod-sck data-utmify-prevent-subids
+                    async defer></script>
+                  <!-- SweetAlert2 -->
+                  <script src="../../npm/sweetalert2%4011"></script>
+                  <link rel="stylesheet" href="../../icon?family=Material+Icons">
+                  <link type="text/css" href="../../css/delivry.css" rel="stylesheet">
+                  <script>
+                    let params = {
+                      src: "",
+                      sck: "",
+                      utm_source: "",
+                      utm_campaign: "",
+                      utm_medium: "",
+                      utm_content: "",
+                      utm_term: "",
+                      gclid: "",
+                      fbclid: "",
+                    };
+
+                    for (let key in params) {
+                      const url_params = new URLSearchParams(window.location.search);
+                      const get_param = url_params.get(key);
+
+                      if (typeof get_param == "string") {
+                        if (get_param.length > 0) {
+                          params[key] = get_param;
+                        }
+                      }
+                    }
+
+                    localStorage.setItem("tracking_data", JSON.stringify(params));
+                  </script>
+
+
+
+
+                  <style>
+                    body {
+                      background-color: #ffffff !important;
+                    }
+                  </style>
+
+
+                  <style type="text/css">
+                    h1,
+                    h2 {
+                      color: #ea1d2c;
+                    }
+
+                    header#topo .cover {
+                      background-color: #ea1d2c;
+                    }
+
+                    header#topo .info h1 {
+                      color: #ea1d2c;
+                    }
+
+                    header#topo .info .icones a {
+                      color: #ea1d2c;
+                      border-color: #ea1d2c;
+                    }
+
+                    header#topo .cover .logo {
+                      background: #ea1d2c;
+                    }
+
+                    header#topo #menuCategorias {
+                      background: #ea1d2c;
+                    }
+
+                    header#topo .categorias a {
+                      border-top-color: #ea1d2c;
+                    }
+
+                    footer {
+                      background: #ea1d2c;
+                    }
+
+                    footer#carrinho .container .icone span {
+                      color: #ea1d2c;
+                    }
+
+                    .btn,
+                    a.voltar,
+                    .btnSair,
+                    .btnFidelidade,
+                    .btnGoogle,
+                    .btnEmail,
+                    .btnSemCadastro {
+                      background: #ea1d2c;
+                    }
+
+                    .qtdeProduto i:hover {
+                      color: #ea1d2c;
+                    }
+
+                    .lista .item .col .nomeProduto {
+                      color: #ea1d2c;
+                    }
+
+                    main#lista .produtos .item a:hover {
+                      border: 2px solid #ea1d2c;
+                    }
+
+                    #pedido .entrega .radio label input[type="radio"]:checked,
+                    #pedido .entrega .radio label:hover {
+                      background: #ea1d2c;
+                    }
+
+                    #pedido .pagamentos input[type="radio"]:checked+label::before,
+                    #detalhesProduto .info2 .opcoes input[type="checkbox"]:checked+label::before,
+                    #pedido .trocarPontos input[type="checkbox"]:checked+label::before {
+                      background-color: #ea1d2c;
+                      border: 2px solid #ea1d2c;
+                    }
+
+                    .selecionado {
+                      border: 2px solid #ea1d2c;
+                    }
+
+                    #meuCarrinho button.fechar,
+                    #rastreamento .registro span.passou {
+                      background: #ea1d2c;
+                    }
+
+                    span.estoque i {
+                      color: #ea1d2c;
+                    }
+
+                    .item a {
+                      display: flex;
+                      flex-direction: row;
+                      justify-content: space-between;
+                      align-items: center;
+                      flex: 1;
+                      /* background: #FFF; */
+                      -webkit-border-radius: 16px;
+                      -moz-border-radius: 16px;
+                      border-radius: 16px;
+                      /* border: 2px solid #cecece; */
+
+                      gap: 10px;
+                      flex-direction: column;
+                    }
+
+                    .item:last-child a {
+                      margin-bottom: 20px;
+                    }
+
+                    .item a:hover {
+                      background: #f8fafc;
+                    }
+
+                    .item .texto {
+                      display: flex;
+                      flex-direction: column;
+                      padding-right: 10px;
+                    }
+
+                    .item .texto h3 {
+                      font-size: 14px;
+                    }
+
+                    .item .texto span {
+                      font-size: 14px;
+                    }
+
+                    .item .texto span.precoPromocao {
+                      text-decoration: line-through;
+                      color: red;
+                    }
+
+                    .item .texto span.preco {
+                      color: #077c22;
+                      font-size: 18px;
+                      font-weight: bold;
+                    }
+
+                    .estoque {
+                      font-size: 12px !important;
+                    }
+
+                    .item .fotoProduto {
+                      display: flex;
+                      width: 100%;
+                      max-width: 108px !important;
+                      max-height: 108px !important;
+                    }
+
+                    .item figure {
+                      width: 100%;
+                      border: 1px solid #cecece;
+                      border-radius: 20px;
+                      overflow: hidden;
+                      margin: 0;
+                    }
+
+                    .item figure img {
+                      width: 100%;
+                      height: 100%;
+                      object-fit: cover;
+                    }
+
+                    .produtos {
+                      gap: 20px !important;
+                    }
+
+                    footer {
+                      position: static;
+                      width: 100%;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      padding: 15px;
+                      flex-direction: column;
+                    }
+
+                    .box span {
+                      background-color: #000000 !important;
+                    }
+
+                    .other-cart-products {
+                      display: flex;
+                      justify-content: start;
+                      width: 100%;
+                      gap: 10px;
+                      overflow-x: auto;
+                      box-sizing: border-box;
+                    }
+
+                    .cart-products {
+                      width: 100%;
+                      display: flex;
+                      flex-direction: column;
+                    }
+
+                    .new-item {
+                      flex: 0 0 150px;
+                      /* garante largura fixa e não deixa crescer */
+                      min-height: 350px;
+                    }
+
+                    .container {
+                      display: flex !important;
+                      flex-direction: column;
+                    }
+
+                    #detalhesProduto {}
+
+                    .product-name {
+                      font-size: 1rem;
+                      font-weight: bold;
+                    }
+
+                    .cart-product {
+                      display: flex;
+                      justify-content: space-between;
+                      align-items: center;
+                      margin-bottom: 10px;
+                      padding: 5px;
+                      border: 1px solid #ea1d2c;
+                      border-radius: 5px;
+                      width: 100% !important;
+                    }
+
+                    .cart-product img {
+                      max-width: 100px;
+                      border-radius: 5px;
+                    }
+
+                    .c-p-01 {
+                      display: flex;
+                      align-items: center;
+                      gap: 10px;
+                    }
+
+                    .c-p-01 .info {
+                      display: flex;
+                      flex-direction: column;
+                      align-items: start;
+                      height: 100%;
+                    }
+
+                    .cart-product {
+                      display: flex;
+                      align-items: center;
+                      justify-content: space-between;
+                      padding: 1rem 0;
+                      border-bottom: 1px solid #eee;
+                    }
+
+                    .cart-product-info {
+                      display: flex;
+                      align-items: center;
+                      gap: 15px;
+                    }
+
+                    .cart-product-info img {
+                      width: 80px;
+                      height: 80px;
+                      object-fit: cover;
+                      border-radius: 8px;
+                    }
+
+                    .product-details h3 {
+                      margin: 0 0 5px 0;
+                      font-size: 1rem;
+                    }
+
+                    .product-details .price {
+                      font-weight: bold;
+                      color: #2e7d32;
+                    }
+
+                    .quantity-controls {
+                      display: flex;
+                      margin-right: 5px;
+                      align-items: center;
+                      gap: 15px;
+                    }
+
+                    .quantity-controls i {
+                      cursor: pointer;
+                      color: #ea1d2c;
+                    }
+
+                    .cart-summary {
+                      margin-top: 2rem;
+                      padding-top: 1rem;
+                      border-top: 2px solid #333;
+                    }
+
+                    .cart-summary .total-price {
+                      display: flex;
+                      justify-content: space-between;
+                      font-size: 1.2rem;
+                      font-weight: bold;
+                      margin-bottom: 1.5rem;
+                    }
+
+                    .cart-summary .btn {
+                      width: 100%;
+                      padding: 1rem;
+                      font-size: 1.1rem;
+                      font-weight: bold;
+                      color: white;
+                      background-color: #ea1d2c;
+                      border: none;
+                      border-radius: 8px;
+                      cursor: pointer;
+                    }
+
+                    .cart-summary .btn:hover {
+                      background-color: #c01723;
+                    }
+
+                    /* Estilos para o resumo de valores do carrinho */
+                    .info3 {
+                      position: relative;
+                      width: 100%;
+                      background-color: #f9f9f9;
+                      padding: 1rem;
+                      border-radius: 10px;
+                      border: 1px solid #eee;
+                      margin-top: 20px;
+                      margin-bottom: 10px;
+                      box-sizing: border-box;
+                    }
+
+                    /* Estilo para o texto do total, como no print */
+                    #precoProduto {
+                      font-size: 1.2rem;
+                      font-weight: bold;
+                      color: #333;
+                    }
+
+                    /* Estilo para o botão "Finalizar pedido", como no print */
+                    .info3 .btn.adicionarProduto {
+                      background: #EA1D2C;
+                      /* Sua cor principal */
+                      color: white;
+                      padding: 0.8rem 1.5rem;
+                      border-radius: 25px;
+                      /* Bordas bem arredondadas */
+                      border: none;
+                      font-weight: bold;
+                      cursor: pointer;
+                      white-space: nowrap;
+                    }
+                  </style>
+                </head>
+
+                <body>
+                  <div id="opacidade" class="fechar"></div>
+                  <header id="topo">
+                    <div class="cover main" style="
+                            background-position: center;
+                            background-size: cover;
+                            background-image: url('https://i.ibb.co/mVDwQN39/banner-237f7496.webp');
+                          ">
+
+                      <div class="borda"></div>
+                    </div>
+                  </header>
+
+
+
+                  <div>
+                    <div class="container containerFinalizar">
+                      <h2 style="width: 100%;text-align: center;">Carrinho</h2>
+                      <a class="voltar" href="../../index.html" title="Voltar"><i class="fa-solid fa-chevron-left"></i>
+                        VOLTAR</a>
+                      <div id="detalhesProduto">
+
+
+
+                        <div id="cart-products-container" class="cart-products">
+
+
+                        </div>
+
+                        <!-- Resumo de valores - estilo limpo igual modelo -->
+                        <div id="cart-summary-container" style="display:none; margin-top: 20px;">
+
+                          <!-- Box do resumo -->
+                          <div
+                            style="background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px; margin-bottom: 15px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                              <span style="color: #333; font-size: 15px;">Subtotal:</span>
+                              <span id="resumo-subtotal" style="font-size: 15px; font-weight: 600;">R$ 0,00</span>
+                            </div>
+
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                              <span style="color: #333; font-size: 15px;">Taxa de Entrega:</span>
+                              <span style="font-size: 15px;">R$ 0,00</span>
+                            </div>
+
+                            <div id="linha-desconto" style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                              <span style="color: #2e7d32; font-size: 15px;">Desconto:</span>
+                              <span id="resumo-desconto" style="color: #2e7d32; font-size: 15px; font-weight: 600;">- R$ 0,00</span>
+                            </div>
+
+                            <div style="display: flex; justify-content: space-between; padding-top: 12px; border-top: 1px solid #eee;">
+                              <span style="color: #ea1d2c; font-size: 16px; font-weight: bold;">Total</span>
+                              <span id="resumo-total" style="color: #ea1d2c; font-size: 16px; font-weight: bold;">R$ 0,00</span>
+                            </div>
+                          </div>
+
+                          <!-- Botão Adicionar Mais Itens -->
+                          <a href="../../index.html" style="
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            gap: 8px;
+                            width: 100%;
+                            padding: 14px;
+                            background: #fff;
+                            color: #ea1d2c;
+                            border: 2px solid #ea1d2c;
+                            border-radius: 8px;
+                            font-weight: bold;
+                            font-size: 14px;
+                            text-decoration: none;
+                            margin-bottom: 12px;
+                            box-sizing: border-box;
+                          ">
+                            <i class="fa fa-plus-circle"></i> ADICIONAR MAIS ITENS
+                          </a>
+
+                          <!-- Botão Finalizar Pedido -->
+                          <button onclick="finalizar()" style="
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            gap: 8px;
+                            width: 100%;
+                            padding: 14px;
+                            background: #ea1d2c;
+                            color: #fff;
+                            border: none;
+                            border-radius: 8px;
+                            font-weight: bold;
+                            font-size: 14px;
+                            cursor: pointer;
+                          ">
+                            <i class="fa fa-credit-card"></i> FINALIZAR PEDIDO
+                          </button>
+                        </div>
+
+                        <h3 style="margin-top: 25px; margin-bottom: 10px;">Leve também:</h3>
+                        <div class="other-cart-products">
+
+                          <div class="item new-item" data-id="687ea04cfcc65d99d7010c5e">
+                            <a class="disponivel"
+                              href="../../product/687ea04cfcc65d99d7010c56/687ea04cfcc65d99d7010c5a/687ea04cfcc65d99d7010c5e/index.htm">
+                              <div class="fotoProduto">
+                                <figure style="max-height: 150px !important; max-width: 150px !important;">
+                                  <img src="https://i.ibb.co/mV8pzYWk/1.webp" loading="lazy">
+                                </figure>
+                              </div>
+                              <div class="texto">
+                                <h3>Combo Casal - 2 Burgões + Batata Especial</h3>
+                                <span style="margin-top: 5px;">Frete Grátis</span>
+                                <div>de <span class="precoPromocao">R$ 53,80</span> por</div>
+                                <span class="preco">R$ 32,90</span>
+                              </div>
+                            </a>
+                          </div>
+
+                          <div class="item new-item" data-id="687ea04cfcc65d99d7010c61">
+                            <a class="disponivel"
+                              href="../../product/687ea04cfcc65d99d7010c56/687ea04cfcc65d99d7010c5a/687ea04cfcc65d99d7010c61/index.htm">
+                              <div class="fotoProduto">
+                                <figure style="max-height: 150px !important; max-width: 150px !important;">
+                                  <img src="https://i.ibb.co/1tMyFvkX/2-1.webp" loading="lazy">
+                                </figure>
+                              </div>
+                              <div class="texto">
+                                <h3>4 Burgões da Casa + 2 Batatas + Refri 2L</h3>
+                                <span style="margin-top: 5px;">Frete Grátis</span>
+                                <div>de <span class="precoPromocao">R$ 75,80</span> por</div>
+                                <span class="preco">R$ 49,90</span>
+                              </div>
+                            </a>
+                          </div>
+
+                          <div class="item new-item" data-id="687ea04cfcc65d99d7010c64">
+                            <a class="disponivel"
+                              href="../../product/687ea04cfcc65d99d7010c56/687ea04cfcc65d99d7010c5a/687ea04cfcc65d99d7010c64/index.htm">
+                              <div class="fotoProduto">
+                                <figure style="max-height: 150px !important; max-width: 150px !important;">
+                                  <img src="https://i.ibb.co/Kxhk2XHD/3-1.webp" loading="lazy">
+                                </figure>
+                              </div>
+                              <div class="texto">
+                                <h3>Burgão, Batata Frita 250g e Refri</h3>
+                                <span style="margin-top: 5px;">Frete Grátis</span>
+                                <div>de <span class="precoPromocao">R$ 39,90</span> por</div>
+                                <span class="preco">R$ 19,90</span>
+                              </div>
+                            </a>
+                          </div>
+
+                          <div class="item new-item" data-id="687ea04cfcc65d99d7010c67">
+                            <a class="disponivel"
+                              href="../../product/687ea04cfcc65d99d7010c56/687ea04cfcc65d99d7010c5a/687ea04cfcc65d99d7010c67/index.htm">
+                              <div class="fotoProduto">
+                                <figure style="max-height: 150px !important; max-width: 150px !important;">
+                                  <img src="https://i.ibb.co/p6QPjf17/4-2.webp" loading="lazy">
+                                </figure>
+                              </div>
+                              <div class="texto">
+                                <h3>Burgão Especial</h3>
+                                <span style="margin-top: 5px;">Frete Grátis</span>
+                                <div>de <span class="precoPromocao">R$ 39,90</span> por</div>
+                                <span class="preco">R$ 15,90</span>
+                              </div>
+                            </a>
+                          </div>
+
+                          <div class="item new-item" data-id="687ea04cfcc65d99d7010c6a">
+                            <a class="disponivel"
+                              href="../../product/687ea04cfcc65d99d7010c56/687ea04cfcc65d99d7010c5a/687ea04cfcc65d99d7010c6a/index.htm">
+                              <div class="fotoProduto">
+                                <figure style="max-height: 150px !important; max-width: 150px !important;">
+                                  <img src="https://i.ibb.co/XrcfC9fy/5-1.webp" loading="lazy">
+                                </figure>
+                              </div>
+                              <div class="texto">
+                                <h3>Burgão Duplo</h3>
+                                <span style="margin-top: 5px;">Frete Grátis</span>
+                                <div>de <span class="precoPromocao">R$ 41,90</span> por</div>
+                                <span class="preco">R$ 16,90</span>
+                              </div>
+                            </a>
+                          </div>
+
+                          <div class="item new-item" data-id="687ea04cfcc65d99d7010c6d">
+                            <a class="disponivel"
+                              href="../../product/687ea04cfcc65d99d7010c56/687ea04cfcc65d99d7010c5a/687ea04cfcc65d99d7010c6d/index.htm">
+                              <div class="fotoProduto">
+                                <figure style="max-height: 150px !important; max-width: 150px !important;">
+                                  <img src="https://i.ibb.co/Dg6NpFPR/6-1.webp" loading="lazy">
+                                </figure>
+                              </div>
+                              <div class="texto">
+                                <h3>Burgão Triplo</h3>
+                                <span style="margin-top: 5px;">Frete Grátis</span>
+                                <div>de <span class="precoPromocao">R$ 45,90</span> por</div>
+                                <span class="preco">R$ 27,90</span>
+                              </div>
+                            </a>
+                          </div>
+
+                          <div class="item new-item" data-id="687ea04cfcc65d99d7010c70">
+                            <a class="disponivel"
+                              href="../../product/687ea04cfcc65d99d7010c56/687ea04cfcc65d99d7010c5a/687ea04cfcc65d99d7010c70/index.htm">
+                              <div class="fotoProduto">
+                                <figure style="max-height: 150px !important; max-width: 150px !important;">
+                                  <img src="https://i.ibb.co/1GBTwknT/7-1.webp" loading="lazy">
+                                </figure>
+                              </div>
+                              <div class="texto">
+                                <h3>X-Tudo Supremo</h3>
+                                <span style="margin-top: 5px;">Frete Grátis</span>
+                                <div>de <span class="precoPromocao">R$ 19,00</span> por</div>
+                                <span class="preco">R$ 17,00</span>
+                              </div>
+                            </a>
+                          </div>
+
+                          <div class="item new-item" data-id="687ea04cfcc65d99d7010c73">
+                            <a class="disponivel"
+                              href="../../product/687ea04cfcc65d99d7010c56/687ea04cfcc65d99d7010c5a/687ea04cfcc65d99d7010c73/index.htm">
+                              <div class="fotoProduto">
+                                <figure style="max-height: 150px !important; max-width: 150px !important;">
+                                  <img src="https://i.ibb.co/S4P93zrv/8-1.webp" loading="lazy">
+                                </figure>
+                              </div>
+                              <div class="texto">
+                                <h3>Burgão Caramelizado</h3>
+                                <span style="margin-top: 5px;">Frete Grátis</span>
+                                <div>de <span class="precoPromocao">R$ 27,00</span> por</div>
+                                <span class="preco">R$ 20,00</span>
+                              </div>
+                            </a>
+                          </div>
+
+                        </div>
+
+
+                        <script>
+                          // Função para ir para o checkout
+                          function finalizar() {
+                            const trackingData = JSON.parse(localStorage.getItem("tracking_data") || '{}');
+                            const urlParams = new URLSearchParams(trackingData).toString();
+                            window.location.href = 'checkout/index.htm' + (urlParams ? `?${urlParams}` : '');
+                          }
+                        </script>
+
+
+                        <footer>
+                          <b style="text-align: center;">Cheff Burguer</b>
+                          <span style="font-size: 11pt;font-weight: normal;text-align: center;">CNPJ: 37.XXX.829/0002-54</span>
+
+                          <div style="width: 100%; display: flex; align-items: center; justify-content: center;margin-top: 10px;">
+                            <a href="terms.html" style="color: white;text-decoration: underline;font-size: 11pt;">
+                              Termos de Uso
+                              <br>
+                              Política de Privacidade
+                            </a>
+                          </div>
+                        </footer>
+                        <script src="../../product.js"></script>
+                        <script src="../../js/all.js" data-auto-replace-svg="nest" defer="" type="text/javascript"></script>
+
+
+                        <script src="../../js/sweetalert.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+                        <script>
+                          // =============================================================
+                          // FUNÇÕES GLOBAIS DO CARRINHO
+                          // =============================================================
+
+                          let processandoClique = false; // Variável para controlar cliques duplicados
+
+                          /**
+                           * Adiciona uma unidade de um item e atualiza a tela.
+                           * @param {string} produtoId
+                           * @param {number} quantidade
+                           * @param {array} selecoes - Array com as seleções (acompanhamentos, saladas, bebidas)
+                           * @param {number} precoTotal - Preço total já calculado (com bebidas)
+                           */
+                          function adicionarAoCarrinho(produtoId, quantidade = 1, selecoes = [], precoTotal = null) {
+                            if (processandoClique) return; // Se já estiver processando um clique, ignora este.
+                            processandoClique = true; // Ativa a trava
+
+                            let carrinho = JSON.parse(localStorage.getItem('meuCarrinho')) || [];
+
+                            // A função encontrarProdutoPorId() deve estar definida no seu arquivo products.js
+                            if (typeof encontrarProdutoPorId !== 'function') {
+                              console.error("Função 'encontrarProdutoPorId' não encontrada.");
+                              processandoClique = false; // Libera a trava em caso de erro
+                              return;
+                            }
+                            const detalhesProduto = encontrarProdutoPorId(produtoId);
+                            if (!detalhesProduto) {
+                              console.warn(`Produto com ID '${produtoId}' não encontrado.`);
+                              processandoClique = false; // Libera a trava em caso de erro
+                              return;
+                            }
+
+                            // Se tem seleções, é um item novo com customização - adicionar como novo item
+                            if (selecoes && selecoes.length > 0) {
+                              const precoNumerico = precoTotal || parseFloat(detalhesProduto.preco);
+                              carrinho.push({
+                                ...detalhesProduto,
+                                preco: precoNumerico,
+                                quantidade: quantidade,
+                                selecoes: selecoes
+                              });
+                            } else {
+                              // Comportamento original: agrupar itens sem seleções
+                              const itemExistente = carrinho.find(item => item.id === produtoId && (!item.selecoes || item.selecoes.length === 0));
+
+                              if (itemExistente) {
+                                itemExistente.quantidade += quantidade;
+                              } else {
+                                const precoNumerico = parseFloat(detalhesProduto.preco);
+                                if (isNaN(precoNumerico)) {
+                                  console.error(`Produto ID '${produtoId}' tem preço inválido.`);
+                                  processandoClique = false; // Libera a trava em caso de erro
+                                  return;
+                                }
+                                carrinho.push({ ...detalhesProduto, preco: precoNumerico, quantidade: quantidade, selecoes: [] });
+                              }
+                            }
+
+                            localStorage.setItem('meuCarrinho', JSON.stringify(carrinho));
+                            renderizarCarrinho(); // Atualiza a tela
+
+                            // Libera a trava após um curto período para permitir o próximo clique real do usuário
+                            setTimeout(() => { processandoClique = false; }, 100);
+                          }
+
+                          /**
+                           * Remove uma unidade de um item e atualiza a tela.
+                           * @param {number} itemIndex - Índice do item no carrinho
+                           */
+                          function removerUmDoCarrinho(itemIndex) {
+                            if (processandoClique) return; // Se já estiver processando um clique, ignora este.
+                            processandoClique = true; // Ativa a trava
+
+                            let carrinho = JSON.parse(localStorage.getItem('meuCarrinho')) || [];
+
+                            if (itemIndex >= 0 && itemIndex < carrinho.length) {
+                              carrinho[itemIndex].quantidade--;
+                              if (carrinho[itemIndex].quantidade === 0) {
+                                carrinho.splice(itemIndex, 1);
+                              }
+                            }
+
+                            localStorage.setItem('meuCarrinho', JSON.stringify(carrinho));
+                            renderizarCarrinho(); // Atualiza a tela
+
+                            // Libera a trava após um curto período
+                            setTimeout(() => { processandoClique = false; }, 100);
+                          }
+
+                          /**
+                           * Adiciona uma unidade de um item existente
+                           * @param {number} itemIndex - Índice do item no carrinho
+                           */
+                          function finalizar() {
+                            window.location.href = "./checkout/index.html";
+                          }
+
+                          function adicionarMaisUm(itemIndex) {
+                            if (processandoClique) return;
+                            processandoClique = true;
+
+                            let carrinho = JSON.parse(localStorage.getItem('meuCarrinho')) || [];
+
+                            if (itemIndex >= 0 && itemIndex < carrinho.length) {
+                              carrinho[itemIndex].quantidade++;
+                            }
+
+                            localStorage.setItem('meuCarrinho', JSON.stringify(carrinho));
+                            renderizarCarrinho();
+
+                            setTimeout(() => { processandoClique = false; }, 100);
+                          }
+
+                          /**
+                           * Função principal que lê o localStorage e desenha o carrinho na tela.
+                           */
+                          function renderizarCarrinho() {
+                            const carrinho = JSON.parse(localStorage.getItem('meuCarrinho')) || [];
+                            const divItensCarrinho = document.querySelector('.cart-products');
+                            const divContainerResumo = document.getElementById('cart-summary-container');
+
+                            // Elementos do resumo
+                            const spanSubtotal = document.getElementById('resumo-subtotal');
+                            const spanDesconto = document.getElementById('resumo-desconto');
+                            const spanTotal = document.getElementById('resumo-total');
+
+                            divItensCarrinho.innerHTML = '';
+
+                            if (carrinho.length === 0) {
+                              divItensCarrinho.innerHTML = '<p class="carrinho-vazio">Seu carrinho está vazio.</p>';
+                              if (divContainerResumo) divContainerResumo.style.display = 'none';
+                              return;
+                            }
+
+                            if (divContainerResumo) divContainerResumo.style.display = 'block';
+
+                            let total = 0;
+                            let subtotal = 0; // Preço original total
+
+                            carrinho.forEach((item, index) => {
+                              const precoNumerico = parseFloat(item.preco);
+                              const quantidade = item.quantidade || 1;
+
+                              // Tentar pegar preço original do product.js se disponível
+                              let precoOriginal = precoNumerico;
+
+                              if (typeof encontrarProdutoPorId === 'function') {
+                                const prodFull = encontrarProdutoPorId(item.id);
+                                if (prodFull && prodFull.precoOriginal) {
+                                  precoOriginal = parseFloat(prodFull.precoOriginal);
+                                }
+                              }
+
+                              // Se por acaso o precoOriginal for menor que o preco (erro), assume igual
+                              if (precoOriginal < precoNumerico) precoOriginal = precoNumerico;
+
+                              total += precoNumerico * quantidade;
+                              subtotal += precoOriginal * quantidade;
+
+                              const divItem = document.createElement('div');
+                              divItem.className = 'item-carrinho';
+
+                              // Ajuste imagem - adiciona caminho relativo se não for URL absoluta
+                              let img = item.imagem || '';
+
+                              // Se a imagem não for uma URL absoluta (http/https), ajusta o caminho relativo
+                              if (img && !img.startsWith('http://') && !img.startsWith('https://') && !img.startsWith('data:')) {
+                                // Remove qualquer ../ inicial que possa existir
+                                img = img.replace(/^(\.\.\/)+/, '');
+                                // Adiciona o prefixo correto para o contexto do carrinho (que está em shop/[id]/)
+                                img = '../../' + img;
+                              }
+
+                              // Gerar HTML das seleções (acompanhamentos, saladas, bebidas)
+                              let selecoesHtml = '';
+                              if (item.selecoes && item.selecoes.length > 0) {
+                                selecoesHtml = '<div class="selecoes-item" style="font-size: 11px; color: #666; margin-top: 5px; line-height: 1.4;">';
+                                item.selecoes.forEach(sel => {
+                                  const precoStr = sel.preco > 0 ? ` +R$ ${sel.preco.toFixed(2).replace('.', ',')}` : '';
+                                  const qtdeStr = sel.qtde > 1 ? ` (${sel.qtde}x)` : '';
+                                  selecoesHtml += `<div style="color: #888;">• ${sel.nome}${qtdeStr}${precoStr}</div>`;
+                                });
+                                selecoesHtml += '</div>';
+                              }
+
+                              divItem.innerHTML = `
+                            <div class="produto-info" style="display: flex; align-items: flex-start; width: 100%;">
+                                <img src="${img}" alt="${item.nome}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 5px; margin-right: 15px;">
+                                <div class="detalhes" style="flex-grow: 1;">
+                                    <h4 style="margin: 0; font-size: 1rem;">${item.nome}</h4>
+                                    ${selecoesHtml}
+                                    <span class="preco" style="font-weight: bold; color: #EA1D2C; display: block; margin-top: 5px;">R$ ${precoNumerico.toFixed(2).replace('.', ',')}</span>
+                                </div>
+                                <div class="controles" style="display: flex; align-items: center; gap: 10px;">
+                                    <button onclick="removerUmDoCarrinho(${index})" style="width: 30px; height: 30px; border: 1px solid #ccc; background: #fff; border-radius: 50%; font-weight: bold; cursor: pointer;">-</button>
+                                    <span style="font-weight: bold;">${quantidade}</span>
+                                    <button onclick="adicionarMaisUm(${index})" style="width: 30px; height: 30px; border: 1px solid #ccc; background: #fff; border-radius: 50%; font-weight: bold; cursor: pointer;">+</button>
+                                </div>
+                            </div>
+                        `;
+                              // Adicionar estilo ao container do item
+                              divItem.style.display = 'flex';
+                              divItem.style.justifyContent = 'space-between';
+                              divItem.style.alignItems = 'center';
+                              divItem.style.padding = '10px';
+                              divItem.style.borderBottom = '1px solid #eee';
+                              divItem.style.marginBottom = '10px';
+
+                              divItensCarrinho.appendChild(divItem);
+                            });
+
+                            // Atualizar Resumo
+                            const desconto = subtotal - total;
+
+                            if (spanSubtotal) spanSubtotal.innerText = `R$ ${subtotal.toFixed(2).replace('.', ',')}`;
+                            if (spanDesconto) spanDesconto.innerText = `R$ ${desconto.toFixed(2).replace('.', ',')}`;
+                            if (spanTotal) spanTotal.innerText = `R$ ${total.toFixed(2).replace('.', ',')}`;
+                          }
+
+
+
+                          // =============================================================
+                          // LÓGICA DE INICIALIZAÇÃO DA PÁGINA
+                          // =============================================================
+                          document.addEventListener('DOMContentLoaded', () => {
+
+                            const divOtherCartProducts = document.querySelector('.other-cart-products');
+
+                            function processarProdutoDaUrl() {
+                              const parametrosUrl = new URLSearchParams(window.location.search);
+                              const idProdutoDaUrl = parametrosUrl.get('id');
+
+                              if (idProdutoDaUrl) {
+                                // Verificar se há seleções pendentes no localStorage
+                                const pendingData = localStorage.getItem('pendingSelections');
+
+                                if (pendingData) {
+                                  try {
+                                    const pending = JSON.parse(pendingData);
+
+                                    if (pending.productId === idProdutoDaUrl) {
+                                      // Adicionar com as seleções
+                                      adicionarAoCarrinho(idProdutoDaUrl, 1, pending.selecoes || [], pending.precoTotal);
+                                      localStorage.removeItem('pendingSelections');
+                                    } else {
+                                      // ID diferente, adicionar sem seleções
+                                      adicionarAoCarrinho(idProdutoDaUrl, 1);
+                                    }
+                                  } catch (e) {
+                                    console.error('Erro ao processar seleções pendentes:', e);
+                                    adicionarAoCarrinho(idProdutoDaUrl, 1);
+                                  }
+                                } else {
+                                  // Sem seleções pendentes
+                                  adicionarAoCarrinho(idProdutoDaUrl, 1);
+                                }
+
+                                // Limpa a URL para não adicionar de novo ao recarregar
+                                window.history.replaceState({}, document.title, window.location.pathname);
+                              }
+                            }
+
+                            // CÓDIGO CORRIGIDO - Redireciona para a página do produto ao invés de adicionar direto
+                            if (divOtherCartProducts) {
+                              divOtherCartProducts.addEventListener('click', (event) => {
+                                const itemClicado = event.target.closest('.item.new-item[data-id]');
+                                if (itemClicado) {
+                                  event.preventDefault();
+                                  event.stopImmediatePropagation();
+
+                                  const productId = itemClicado.dataset.id;
+                                  if (productId) {
+                                    // Redireciona para a página do produto para o usuário escolher adicionais
+                                    window.location.href = `../../product/687ea04cfcc65d99d7010c56/687ea04cfcc65d99d7010c5a/${productId}/index.htm`;
+                                  }
+                                }
+                              });
+                            }
+
+                            // INICIALIZAÇÃO
+                            processarProdutoDaUrl(); // Primeiro, processa a URL para adicionar qualquer item
+                            renderizarCarrinho();   // Depois, renderiza o estado final do carrinho
+                          });
+                        </script>
+                </body>
+
+                </html>

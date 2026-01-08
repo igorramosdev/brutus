@@ -1,0 +1,1203 @@
+
+<html>
+
+<head>
+   
+
+  <script src="../../../../scripts/utms/latest.js" data-utmify-prevent-xcod-sck="" data-utmify-prevent-subids=""
+    async="" defer=""></script>
+
+
+
+  <script>
+    window.googlePixelId = "6939e6eb93ad351dc55b7088";
+    var a = document.createElement("script");
+    a.setAttribute("async", "");
+    a.setAttribute("defer", "");
+    a.setAttribute("src", "https://cdn.utmify.com.br/scripts/pixel/pixel-google.js");
+    document.head.appendChild(a);
+  </script>
+  <script src="https://cdn.utmify.com.br/scripts/utms/latest.js" data-utmify-prevent-xcod-sck data-utmify-prevent-subids
+    async defer></script>
+  <script>
+    let params = {
+      src: "",
+      sck: "",
+      utm_source: "",
+      utm_campaign: "",
+      utm_medium: "",
+      utm_content: "",
+      utm_term: "",
+      gclid: "",
+      fbclid: "",
+    };
+
+    for (let key in params) {
+      const url_params = new URLSearchParams(window.location.search);
+      const get_param = url_params.get(key);
+
+      if (typeof get_param == "string") {
+        if (get_param.length > 0) {
+          params[key] = get_param;
+        }
+      }
+    }
+
+    localStorage.setItem("tracking_data", JSON.stringify(params));
+  </script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", async function () {
+      console.log(1)
+      async function sendRequestToAPI({ endpoint, method, body }) {
+        console.log({
+          endpoint, method, body
+        })
+        try {
+          const response = await fetch(endpoint, {
+            method,
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: body != null ? JSON.stringify(body) : null,
+          });
+
+          const data = await response.json();
+
+          return {
+            error: false,
+            success: true,
+            result: data,
+          };
+        } catch (error) {
+          console.log({
+            error
+          })
+          return {
+            error: true,
+            success: false,
+            result: error,
+          };
+        }
+
+      }
+
+      let user_id;
+
+      if (localStorage.getItem("lead_user_id")) {
+        user_id = localStorage.getItem("lead_user_id");
+      } else {
+        user_id = `${Math.floor(Math.random() * 99999)}-${Math.floor(
+          Math.random() * 99999
+        )}`;
+        localStorage.setItem("lead_user_id", user_id);
+      }
+
+
+      try {
+        await sendRequestToAPI({
+          endpoint: "/api/shop/687ea04cfcc65d99d7010c56/active-users/new-user",
+          method: "POST",
+          body: { user_id, href: window.location.href },
+        });
+
+        setInterval(async () => {
+          await sendRequestToAPI({
+            endpoint: "/api/shop/687ea04cfcc65d99d7010c56/active-users/update-user",
+            method: "POST",
+            body: { user_id, href: window.location.href },
+          });
+        }, 2000);
+
+        window.addEventListener("pagehide", () => {
+          const body = JSON.stringify({
+            user_id, href: window.location.href
+          });
+
+          const blob = new Blob([body], {
+            type: "application/json",
+          });
+
+          navigator.sendBeacon(
+            `/api/shop/687ea04cfcc65d99d7010c56/blob/active-users/end-user`,
+            blob
+          );
+        });
+      } catch (error) {
+        console.log(error);
+      }
+    });
+  </script>
+
+
+
+
+
+
+  <style>
+    body {
+      background-color: #ffffff !important;
+      padding-bottom: 80px;
+    }
+  </style>
+
+
+  <meta http-equiv="content-type" content="text/html;charset=UTF-8">
+  <!-- /Added by HTTrack -->
+  <meta http-equiv="content-type" content="text/html;charset=UTF-8">
+
+  <meta name="google" content="notranslate">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="shortcut icon" type="image/jpg"
+    href="https://scontent.fgyn22-1.fna.fbcdn.net/v/t39.30808-6/487529998_1268865461423703_1918764225145965035_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=_JnDNq1AW4QQ7kNvwGY41GY&_nc_oc=AdmCm4242ZtBRMw1VG090S6p8Q363v7DtzokiZA9P0DItjz3CKwi_rxWeBV-HQaBYN8&_nc_zt=23&_nc_ht=scontent.fgyn22-1.fna&_nc_gid=Mwk1c33rVDonTU3hqDHxFw&oh=00_AfPWgYJjoxVWLSoNGAhbowHVG8qStnsB_vM-s6j4wtEd8g&oe=686C78E3">
+  <title>Faça seu pedido!</title>
+  <link type="text/css" href="../../../../css/delivry.css" rel="stylesheet">
+  <style type="text/css">
+    h1,
+    h2 {
+      color: #ea1d2c;
+    }
+
+    header#topo .cover {
+      background-color: #ea1d2c;
+    }
+
+    header#topo .info h1 {
+      color: #ea1d2c;
+    }
+
+    header#topo .info .icones a {
+      color: #ea1d2c;
+      border-color: #ea1d2c;
+    }
+
+    header#topo .cover .logo {
+      background: #ea1d2c;
+    }
+
+    header#topo #menuCategorias {
+      background: #ea1d2c;
+    }
+
+    header#topo .categorias a {
+      border-top-color: #ea1d2c;
+    }
+
+    footer {
+      background: #ea1d2c;
+    }
+
+    footer#carrinho .container .icone span {
+      color: #ea1d2c;
+    }
+
+    .btn,
+    a.voltar,
+    .btnSair,
+    .btnFidelidade,
+    .btnGoogle,
+    .btnEmail,
+    .btnSemCadastro {
+      background: #ea1d2c;
+    }
+
+    .qtdeProduto i:hover {
+      color: #ea1d2c;
+    }
+
+    .lista .item .col .nomeProduto {
+      color: #ea1d2c;
+    }
+
+    main#lista .produtos .item a:hover {
+      border: 2px solid #ea1d2c;
+    }
+
+    #pedido .entrega .radio label input[type="radio"]:checked,
+    #pedido .entrega .radio label:hover {
+      background: #ea1d2c;
+    }
+
+    #pedido .pagamentos input[type="radio"]:checked+label::before,
+    #detalhesProduto .info2 .opcoes input[type="checkbox"]:checked+label::before,
+    #pedido .trocarPontos input[type="checkbox"]:checked+label::before {
+      background-color: #ea1d2c;
+      border: 2px solid #ea1d2c;
+    }
+
+    .selecionado {
+      border: 2px solid #ea1d2c;
+    }
+
+    #meuCarrinho button.fechar,
+    #rastreamento .registro span.passou {
+      background: #ea1d2c;
+    }
+
+    span.estoque i {
+      color: #ea1d2c;
+    }
+  </style>
+  <meta name="theme-color" content="#ea1d2c">
+  <meta name="apple-mobile-web-app-capacity" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar" content="#ea1d2c">
+  <meta name="apple-mobile-web-app-status-bar-style" content="#ea1d2c">
+  <meta name="apple-mobile-web-app-title" content="Rancho Caseiro">
+  <!-- SweetAlert2 -->
+  <script src="../../../../npm/sweetalert2%4011"></script>
+  <link rel="stylesheet" href="../../../../icon?family=Material+Icons">
+</head>
+
+<body>
+  <div id="opacidade" class="fechar"></div>
+
+  <!-- HERO SECTION - FORA DE TODOS OS CONTAINERS -->
+  <style>
+    /* Esconder botão VOLTAR original */
+    .container.containerFinalizar>a.voltar {
+      display: none !important;
+    }
+
+    /* Reset global AGRESSIVO */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box !important;
+    }
+
+    body,
+    html {
+      overflow-x: hidden !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      width: 100% !important;
+    }
+
+    /* HERO SECTION - FORÇA LARGURA TOTAL DA VIEWPORT */
+    .hero-product-container {
+      position: relative !important;
+      width: 100vw !important;
+      max-width: 100vw !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      margin-bottom: 50px !important;
+      left: 0 !important;
+      right: 0 !important;
+      box-sizing: border-box !important;
+    }
+
+    .hero-product-container figure {
+      margin: 0 !important;
+      padding: 0 !important;
+      width: 100vw !important;
+      max-width: 100vw !important;
+      display: block !important;
+    }
+
+    .hero-product-container figure img {
+      width: 100vw !important;
+      max-width: 100vw !important;
+      height: 320px !important;
+      object-fit: cover !important;
+      display: block !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      border-radius: 0 !important;
+    }
+
+    /* Botões flutuantes sobre a imagem */
+    .hero-nav-btns {
+      position: absolute !important;
+      top: 16px !important;
+      left: 16px !important;
+      right: 16px !important;
+      display: flex !important;
+      justify-content: space-between !important;
+      z-index: 100 !important;
+    }
+
+    .hero-btn {
+      width: 44px !important;
+      height: 44px !important;
+      border-radius: 50% !important;
+      background: #ea1d2c !important;
+      border: none !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      cursor: pointer !important;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3) !important;
+      text-decoration: none !important;
+    }
+
+    .hero-btn i {
+      color: #fff !important;
+      font-size: 18px !important;
+    }
+
+    /* Badge da loja flutuante - sobrepõe a imagem */
+    .store-info-badge {
+      position: absolute !important;
+      bottom: -28px !important;
+      left: 50% !important;
+      transform: translateX(-50%) !important;
+      background: #fffff5 !important;
+      border-radius: 50px !important;
+      padding: 10px 20px 10px 12px !important;
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      gap: 12px !important;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15) !important;
+      z-index: 100 !important;
+      white-space: nowrap !important;
+    }
+
+    .store-info-badge .badge-logo {
+      width: 44px !important;
+      height: 44px !important;
+      min-width: 44px !important;
+      border-radius: 50% !important;
+      object-fit: cover !important;
+      border: 2px solid #eee !important;
+      background: #fff !important;
+    }
+
+    .store-info-badge .badge-content {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 3px !important;
+    }
+
+    .store-info-badge .store-name {
+      font-size: 14px !important;
+      font-weight: 700 !important;
+      color: #3e3e3e !important;
+      margin: 0 !important;
+      line-height: 1.2 !important;
+    }
+
+    .store-info-badge .store-details {
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      gap: 6px !important;
+      font-size: 12px !important;
+      color: #717171 !important;
+    }
+
+    .store-info-badge .store-details .open-status {
+      color: #50a773 !important;
+      font-weight: 600 !important;
+      display: flex !important;
+      align-items: center !important;
+      gap: 4px !important;
+    }
+
+    .store-info-badge .store-details .open-status::after {
+      content: '' !important;
+      display: inline-block !important;
+      width: 8px !important;
+      height: 8px !important;
+      background: #50a773 !important;
+      border-radius: 50% !important;
+    }
+
+    @media (max-width: 420px) {
+      .store-info-badge {
+        padding: 8px 14px 8px 10px !important;
+        gap: 10px !important;
+      }
+
+      .store-info-badge .badge-logo {
+        width: 38px !important;
+        height: 38px !important;
+        min-width: 38px !important;
+      }
+
+      .store-info-badge .store-name {
+        font-size: 12px !important;
+      }
+
+      .store-info-badge .store-details {
+        font-size: 11px !important;
+        gap: 4px !important;
+      }
+
+      .hero-product-container figure img {
+        height: 260px !important;
+      }
+    }
+
+    /* Container de conteúdo */
+    .container.containerFinalizar {
+      border: none !important;
+      border-radius: 0 !important;
+      padding: 0 15px !important;
+      margin: 0 auto !important;
+      max-width: 800px !important;
+      background: #fff !important;
+    }
+
+    #detalhesProduto {
+      padding: 0 !important;
+      padding-bottom: 100px !important;
+    }
+
+    .info1 {
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+
+    /* Esconder estrutura antiga */
+    .fotoProduto,
+    .specifications {
+      display: none !important;
+    }
+
+    /* Mostrar seção de produto */
+    .product-info-section {
+      padding: 25px 20px !important;
+      background: #fff !important;
+    }
+
+    .product-info-section .product-title {
+      font-size: 22px !important;
+      font-weight: 700 !important;
+      color: #3e3e3e !important;
+      margin: 0 0 8px 0 !important;
+      line-height: 1.3 !important;
+    }
+
+    .product-info-section .product-description {
+      font-size: 15px !important;
+      color: #717171 !important;
+      margin: 0 0 14px 0 !important;
+      line-height: 1.5 !important;
+    }
+
+    .product-info-section .price-row {
+      display: flex !important;
+      align-items: center !important;
+      gap: 10px !important;
+    }
+
+    .product-info-section .price-current {
+      font-size: 22px !important;
+      font-weight: 700 !important;
+      color: #50a773 !important;
+    }
+
+    .product-info-section .price-original {
+      font-size: 16px !important;
+      color: #ea1d2c !important;
+      text-decoration: line-through !important;
+    }
+
+    /* DESKTOP STYLES */
+    @media (min-width: 768px) {
+      .hero-product-container {
+        max-width: 600px !important;
+        margin: 0 auto !important;
+        margin-bottom: 50px !important;
+      }
+
+      .hero-product-container figure img {
+        width: 100% !important;
+        max-width: 600px !important;
+        border-radius: 16px !important;
+      }
+
+      .product-info-section {
+        max-width: 600px !important;
+        margin: 0 auto !important;
+        padding: 25px 0 !important;
+      }
+
+      .store-info-badge {
+        bottom: -28px !important;
+      }
+    }
+  </style>
+
+  <div class="hero-product-container">
+    <figure>
+      <img src="https://i.ibb.co/1tMyFvkX/2-1.webp" id="main_image" alt="4 Burgões da Casa">
+    </figure>
+
+    <!-- Botões de navegação -->
+    <div class="hero-nav-btns">
+      <a href="../../../../index.html" class="hero-btn" title="Voltar">
+        <i class="fa-solid fa-chevron-left"></i>
+      </a>
+      <a href="../../../../shop/681aaff4852ac923b1bcabfb/cart.html" class="hero-btn" title="Carrinho">
+        <i class="fa-solid fa-cart-shopping"></i>
+      </a>
+    </div>
+
+    <!-- Badge da loja -->
+    <div class="store-info-badge">
+      <img class="badge-logo" src="../../../../SN8gVgwk/logocheff.png" alt="Cheff Burguer">
+      <div class="badge-content">
+        <p class="store-name">Cheff Burguer - A 1,6 km de você</p>
+        <div class="store-details">
+          <span>25-45 min</span>
+          <span>•</span>
+          <span>Frete Grátis</span>
+          <span class="open-status">Aberto</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Informações do Produto -->
+  <div class="product-info-section">
+    <h1 class="product-title">4 Burgões da Casa + 2 porções de batata com cheddar e bacon 250g + refrigerante 2L</h1>
+    <p class="product-description">Escolha 4 Hambúrgueres + 2 porções de batata com cheddar e bacon 250g + refrigerante
+      2L</p>
+    <div class="price-row">
+      <span class="price-current">R$ 49,90</span>
+      <span class="price-original">R$ 75,80</span>
+    </div>
+  </div>
+
+  <div>
+    <div class="container containerFinalizar">
+      <a class="voltar" href="../../../../index.html" title="Voltar"><i class="fa-solid fa-chevron-left"></i> VOLTAR</a>
+      <div id="detalhesProduto">
+        <div class="info1" style="flex-direction: column;">
+          <div class="somarAoPreco" style="display: none">s</div>
+          <div class="fotoProduto" style="display:none">
+            <figure>
+              <img src="https://i.ibb.co/1tMyFvkX/2-1.webp" width="300px" height="300px" id="main_image">
+            </figure>
+          </div>
+
+
+          <script>
+            function setViewImage(url) {
+              document.getElementById("main_image").setAttribute("src", url);
+            }
+          </script>
+
+          <div class="descricao" style="display:none">
+            <h3>4 Burgões da Casa + 2 porções de batata com cheddar e bacon 250g + refrigerante 2L</h3>
+            <br>
+            <div>
+              de
+              <span class="precoPromocao">R$ 75,80</span>
+              por
+            </div>
+            <span class="preco">
+              R$ 49,90<span style="display: none">49.90</span>
+            </span>
+            <span class="estoque"><i class="fa-solid fa-circle-down"></i> apenas
+              <span id="disponiveis">...</span> disponíveis</span>
+
+            <script>
+              const disponiveis = document.getElementById("disponiveis");
+              const rand = Math.floor(Math.random() * 80) + 7;
+              const id = "4 Burgões da Casa + 2 porções de batata com cheddar e bacon 250g + refrigerante 2L";
+
+              if (localStorage.getItem(id)) {
+                disponiveis.innerHTML = localStorage.getItem(id);
+              } else {
+                disponiveis.innerHTML = rand;
+                localStorage.setItem(id, rand);
+              }
+            </script>
+          </div>
+        </div>
+
+
+        <div class="specifications">
+          <div class="specifications-title">
+            <h3>Descrição</h3>
+          </div>
+          <div class="specifications-content">
+            <p>Escolha 4 Hambúrgueres + 2 porções de batata com cheddar e bacon 250g + refrigerante 2L
+              <br>
+            </p>
+          </div>
+        </div>
+
+
+        <style>
+          .specifications {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            border-radius: 10px;
+          }
+
+          .specifications-title {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+          }
+
+          .specifications-content ul {
+            list-style-type: none;
+            padding-left: 0;
+          }
+
+          .specifications-content li {
+            margin-bottom: 5px;
+          }
+        </style>
+
+        <div class="info2">
+
+
+
+
+
+
+          <!-- ESTILOS PARA ITENS COMPACTOS -->
+          <style>
+            .item-compacto {
+              display: flex;
+              align-items: center;
+              padding: 12px 0;
+              border-bottom: 1px solid #eee;
+            }
+
+            .item-compacto-img {
+              width: 50px;
+              height: 50px;
+              object-fit: cover;
+              margin-right: 12px;
+              border-radius: 8px;
+            }
+
+            .item-compacto-info {
+              flex: 1;
+            }
+
+            .item-compacto-nome {
+              font-weight: 600;
+              font-size: 14px;
+              color: #333;
+              margin: 0;
+            }
+
+            .item-compacto-preco {
+              font-size: 13px;
+              color: #666;
+            }
+
+            .item-compacto-qtde {
+              display: flex;
+              align-items: center;
+              border: 1px solid #ddd;
+              border-radius: 20px;
+              padding: 4px 8px;
+            }
+
+            .item-compacto-qtde input {
+              width: 30px;
+              text-align: center;
+              border: none;
+              font-size: 14px;
+              background: transparent;
+            }
+
+            .item-compacto-qtde button {
+              width: 24px;
+              height: 24px;
+              border: none;
+              background: transparent;
+              font-size: 18px;
+              cursor: pointer;
+              color: #333;
+            }
+          </style>
+
+          <!-- SEÇÃO ESCOLHA SEUS HAMBURGUERES (PRIMEIRA SEÇÃO) -->
+          <div id="escolha-hamburgueres" class="tipo" data-id="15316" data-calculo="n" data-minimo="4" data-maximo="4"
+            data-opcional="n">
+            <div class="topo">
+              <div>
+                <h3>Escolha seus Hamburgueres:</h3>
+                <span class="detalhe">Escolha exatamente 4 opções (obrigatório)</span>
+              </div>
+              <div class="col2">
+                <span class="escolhidos"><span>0</span>/4</span>
+              </div>
+            </div>
+
+            <!-- 1. Burgão Especial -->
+            <div class="opcoes item-compacto" data-id="burg01">
+              <img src="https://i.ibb.co/p6QPjf17/4-2.webp" class="item-compacto-img" alt="Burgão Especial">
+              <div class="item-compacto-info">
+                <p class="item-compacto-nome">Burgão Especial</p>
+                <p class="item-compacto-desc" style="font-size:12px;color:#666;margin:4px 0 0 0;">Carne 100% bovina,
+                  cheddar, linguiça defumada, cebola caramelizada no BBQ, tomate, alface e pão brioche</p>
+              </div>
+              <span style="display:none;">0.00</span>
+              <div class="qtdeProdutoOpcao item-compacto-qtde">
+                <button class="removerQtdeOpcao">−</button>
+                <input class="qtdeOpcao" type="text" value="0" disabled>
+                <button class="adicionarQtdeOpcao">+</button>
+              </div>
+            </div>
+
+            <!-- 2. Burgão Duplo -->
+            <div class="opcoes item-compacto" data-id="burg02">
+              <img src="https://i.ibb.co/XrcfC9fy/5-1.webp" class="item-compacto-img" alt="Burgão Duplo">
+              <div class="item-compacto-info">
+                <p class="item-compacto-nome">Burgão Duplo</p>
+                <p class="item-compacto-desc" style="font-size:12px;color:#666;margin:4px 0 0 0;">Duas carnes
+                  suculentas, queijo cheddar derretido, alface, tomate, maionese e pão brioche selado</p>
+              </div>
+              <span style="display:none;">0.00</span>
+              <div class="qtdeProdutoOpcao item-compacto-qtde">
+                <button class="removerQtdeOpcao">−</button>
+                <input class="qtdeOpcao" type="text" value="0" disabled>
+                <button class="adicionarQtdeOpcao">+</button>
+              </div>
+            </div>
+
+            <!-- 3. Burgão Triplo -->
+            <div class="opcoes item-compacto" data-id="burg03">
+              <img src="https://i.ibb.co/Dg6NpFPR/6-1.webp" class="item-compacto-img" alt="Burgão Triplo">
+              <div class="item-compacto-info">
+                <p class="item-compacto-nome">Burgão Triplo</p>
+                <p class="item-compacto-desc" style="font-size:12px;color:#666;margin:4px 0 0 0;">3 carnes suculentas,
+                  queijo derretido, bacon crocante, presunto, ovo, alface, tomate e maionese</p>
+              </div>
+              <span style="display:none;">0.00</span>
+              <div class="qtdeProdutoOpcao item-compacto-qtde">
+                <button class="removerQtdeOpcao">−</button>
+                <input class="qtdeOpcao" type="text" value="0" disabled>
+                <button class="adicionarQtdeOpcao">+</button>
+              </div>
+            </div>
+
+            <!-- 4. X-Tudo Supremo -->
+            <div class="opcoes item-compacto" data-id="burg04">
+              <img src="https://i.ibb.co/1GBTwknT/7-1.webp" class="item-compacto-img" alt="X-Tudo Supremo">
+              <div class="item-compacto-info">
+                <p class="item-compacto-nome">X-Tudo Supremo</p>
+                <p class="item-compacto-desc" style="font-size:12px;color:#666;margin:4px 0 0 0;">Hambúrguer, salsicha,
+                  bacon, presunto, queijo, alface, tomate e muito sabor no pão macio</p>
+              </div>
+              <span style="display:none;">0.00</span>
+              <div class="qtdeProdutoOpcao item-compacto-qtde">
+                <button class="removerQtdeOpcao">−</button>
+                <input class="qtdeOpcao" type="text" value="0" disabled>
+                <button class="adicionarQtdeOpcao">+</button>
+              </div>
+            </div>
+
+            <!-- 5. Burgão Caramelizado -->
+            <div class="opcoes item-compacto" data-id="burg05">
+              <img src="https://i.ibb.co/S4P93zrv/8-1.webp" class="item-compacto-img" alt="Burgão Caramelizado">
+              <div class="item-compacto-info">
+                <p class="item-compacto-nome">Burgão Caramelizado</p>
+                <p class="item-compacto-desc" style="font-size:12px;color:#666;margin:4px 0 0 0;">Pão brioche, carne
+                  artesanal 100g, queijo cheddar, bacon crocante, cebola caramelizada e barbecue</p>
+              </div>
+              <span style="display:none;">0.00</span>
+              <div class="qtdeProdutoOpcao item-compacto-qtde">
+                <button class="removerQtdeOpcao">−</button>
+                <input class="qtdeOpcao" type="text" value="0" disabled>
+                <button class="adicionarQtdeOpcao">+</button>
+              </div>
+            </div>
+
+            <!-- 6. Burguer cheddar e bacon -->
+            <div class="opcoes item-compacto" data-id="burg06">
+              <img src="https://i.ibb.co/p6kBMzcz/9.webp" class="item-compacto-img" alt="Burguer cheddar e bacon">
+              <div class="item-compacto-info">
+                <p class="item-compacto-nome">Burguer cheddar e bacon</p>
+                <p class="item-compacto-desc" style="font-size:12px;color:#666;margin:4px 0 0 0;">Pão brioche, carne
+                  artesanal 100g, molho cheddar cremoso, bacon crocante e barbecue</p>
+              </div>
+              <span style="display:none;">0.00</span>
+              <div class="qtdeProdutoOpcao item-compacto-qtde">
+                <button class="removerQtdeOpcao">−</button>
+                <input class="qtdeOpcao" type="text" value="0" disabled>
+                <button class="adicionarQtdeOpcao">+</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- SEÇÃO SACHETS -->
+          <div id="saladas" class="tipo" data-id="15314" data-calculo="n" data-minimo="0" data-maximo="6"
+            data-opcional="s">
+            <div class="topo">
+              <div>
+                <h3>Sachets:</h3>
+                <span class="detalhe">Escolha até 6 opções grátis</span>
+              </div>
+              <div class="col2">
+                <span class="escolhidos"><span>0</span>/6</span>
+              </div>
+            </div>
+
+            <div class="opcoes item-compacto" data-id="sachet01">
+              <img
+                src="https://i.ibb.co/35hRzx99/ketchup-heinz-sache-7g-c-144-unidades-76-3-14cdcd338e3c95cabad4d5180b4ef0f6.webp"
+                class="item-compacto-img" alt="Ketchup">
+              <div class="item-compacto-info">
+                <p class="item-compacto-nome">Ketchup</p>
+              </div>
+              <span style="display:none;">0.00</span>
+              <div class="qtdeProdutoOpcao item-compacto-qtde">
+                <button class="removerQtdeOpcao">−</button>
+                <input class="qtdeOpcao" type="text" value="0" disabled>
+                <button class="adicionarQtdeOpcao">+</button>
+              </div>
+            </div>
+
+            <div class="opcoes item-compacto" data-id="sachet02">
+              <img
+                src="https://i.ibb.co/YFKs39Vj/maionese-heinz-sache-7g-caixa-176-unidades-78-1-6b16e1422e5a390738caaee7364a3d29.webp"
+                class="item-compacto-img" alt="Maionese">
+              <div class="item-compacto-info">
+                <p class="item-compacto-nome">Maionese</p>
+              </div>
+              <span style="display:none;">0.00</span>
+              <div class="qtdeProdutoOpcao item-compacto-qtde">
+                <button class="removerQtdeOpcao">−</button>
+                <input class="qtdeOpcao" type="text" value="0" disabled>
+                <button class="adicionarQtdeOpcao">+</button>
+              </div>
+            </div>
+
+            <div class="opcoes item-compacto" data-id="sachet03">
+              <img src="https://i.ibb.co/HTPx1Dy6/219557.jpg" class="item-compacto-img" alt="Maionese com Pimenta">
+              <div class="item-compacto-info">
+                <p class="item-compacto-nome">Maionese com Pimenta</p>
+              </div>
+              <span style="display:none;">0.00</span>
+              <div class="qtdeProdutoOpcao item-compacto-qtde">
+                <button class="removerQtdeOpcao">−</button>
+                <input class="qtdeOpcao" type="text" value="0" disabled>
+                <button class="adicionarQtdeOpcao">+</button>
+              </div>
+            </div>
+
+            <div class="opcoes item-compacto" data-id="sachet04">
+              <img src="https://i.ibb.co/MmQrW8Z/images.jpg" class="item-compacto-img" alt="Molho Verde da Casa">
+              <div class="item-compacto-info">
+                <p class="item-compacto-nome">Molho Verde da Casa</p>
+              </div>
+              <span style="display:none;">0.00</span>
+              <div class="qtdeProdutoOpcao item-compacto-qtde">
+                <button class="removerQtdeOpcao">−</button>
+                <input class="qtdeOpcao" type="text" value="0" disabled>
+                <button class="adicionarQtdeOpcao">+</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- SEÇÃO ACOMPANHAMENTOS -->
+          <div id="complementos-gratis" class="tipo" data-id="15313" data-calculo="n" data-minimo="0" data-maximo="2"
+            data-opcional="s">
+            <div class="topo">
+              <div>
+                <h3>Acompanhamentos:</h3>
+                <span class="detalhe">Escolha até 2 opções grátis</span>
+              </div>
+              <div class="col2">
+                <span class="escolhidos"><span>0</span>/2</span>
+              </div>
+            </div>
+
+            <!-- 1. Batata com Cheddar e Bacon 250g -->
+            <div class="opcoes item-compacto" data-id="acomp01">
+              <img src="https://i.ibb.co/nqWqQpMT/202501291841-0308-iblob-600.webp" class="item-compacto-img"
+                alt="Batata com Cheddar e Bacon 250g">
+              <div class="item-compacto-info">
+                <p class="item-compacto-nome">Batata com Cheddar e Bacon 250g</p>
+                <p class="item-compacto-desc" style="font-size:12px;color:#666;margin:4px 0 0 0;">Batata frita coberta
+                  com cheddar cremoso e bacon crocante</p>
+              </div>
+              <span style="display:none;">12.00</span>
+              <div class="qtdeProdutoOpcao item-compacto-qtde">
+                <button class="removerQtdeOpcao">−</button>
+                <input class="qtdeOpcao" type="text" value="0" disabled>
+                <button class="adicionarQtdeOpcao">+</button>
+              </div>
+            </div>
+
+            <!-- 2. Batata Frita 250grs -->
+            <div class="opcoes item-compacto" data-id="acomp02">
+              <img src="https://i.ibb.co/SDSKM6d4/batata-frita-1200x675.webp" class="item-compacto-img"
+                alt="Batata Frita 250grs">
+              <div class="item-compacto-info">
+                <p class="item-compacto-nome">Batata Frita 250grs</p>
+                <p class="item-compacto-desc" style="font-size:12px;color:#666;margin:4px 0 0 0;">Batata frita
+                  tradicional sequinha e crocante</p>
+              </div>
+              <span style="display:none;">8.00</span>
+              <div class="qtdeProdutoOpcao item-compacto-qtde">
+                <button class="removerQtdeOpcao">−</button>
+                <input class="qtdeOpcao" type="text" value="0" disabled>
+                <button class="adicionarQtdeOpcao">+</button>
+              </div>
+            </div>
+
+            <!-- 3. Porção 12 Nuggets de Frango -->
+            <div class="opcoes item-compacto" data-id="acomp03">
+              <img src="https://i.ibb.co/mFgs6Z1r/empanado-de-frango-1024x494.jpg" class="item-compacto-img"
+                alt="Porção 12 Nuggets de Frango">
+              <div class="item-compacto-info">
+                <p class="item-compacto-nome">Porção 12 Nuggets de Frango</p>
+                <p class="item-compacto-desc" style="font-size:12px;color:#666;margin:4px 0 0 0;">Crocantes por fora,
+                  suculentos por dentro</p>
+              </div>
+              <span style="display:none;">12.90</span>
+              <div class="qtdeProdutoOpcao item-compacto-qtde">
+                <button class="removerQtdeOpcao">−</button>
+                <input class="qtdeOpcao" type="text" value="0" disabled>
+                <button class="adicionarQtdeOpcao">+</button>
+              </div>
+            </div>
+
+          </div>
+
+
+
+          <!-- SEÇÃO BEBIDAS -->
+          <div id="bebidas" class="tipo" data-id="15315" data-calculo="n" data-minimo="0" data-maximo="1"
+            data-opcional="s">
+            <div class="topo">
+              <div>
+                <h3>Refrigerantes:</h3>
+                <span class="detalhe">Escolha 1 opção grátis</span>
+              </div>
+              <div class="col2">
+                <span class="escolhidos"><span>0</span>/1</span>
+              </div>
+            </div>
+
+            <!-- Coca Cola 2L -->
+            <div class="opcoes item-compacto" data-id="bebida01">
+              <img src="https://i.ibb.co/wNzq9Z2R/2750863-800-auto.webp" class="item-compacto-img" alt="Coca Cola 2L">
+              <div class="item-compacto-info">
+                <p class="item-compacto-nome">Coca Cola 2L</p>
+              </div>
+              <span class="preco"><span style="display:none;">0.00</span></span>
+              <div class="qtdeProdutoOpcao item-compacto-qtde">
+                <button class="removerQtdeOpcao">−</button>
+                <input class="qtdeOpcao" type="text" value="0" disabled>
+                <button class="adicionarQtdeOpcao">+</button>
+              </div>
+            </div>
+
+            <!-- Coca Cola Zero 2L -->
+            <div class="opcoes item-compacto" data-id="bebida02">
+              <img src="https://i.ibb.co/yct4FZHk/108903-0.webp" class="item-compacto-img" alt="Coca Cola Zero 2L">
+              <div class="item-compacto-info">
+                <p class="item-compacto-nome">Coca Cola Zero 2L</p>
+              </div>
+              <span class="preco"><span style="display:none;">0.00</span></span>
+              <div class="qtdeProdutoOpcao item-compacto-qtde">
+                <button class="removerQtdeOpcao">−</button>
+                <input class="qtdeOpcao" type="text" value="0" disabled>
+                <button class="adicionarQtdeOpcao">+</button>
+              </div>
+            </div>
+
+            <!-- Guaraná Antarctica 2L -->
+            <div class="opcoes item-compacto" data-id="bebida03">
+              <img src="https://i.ibb.co/spD1fJhP/refrigerante-guarana-antarctica-garrafa-2l-2.webp"
+                class="item-compacto-img" alt="Guaraná Antarctica 2L">
+              <div class="item-compacto-info">
+                <p class="item-compacto-nome">Guaraná Antarctica 2L</p>
+              </div>
+              <span class="preco"><span style="display:none;">0.00</span></span>
+              <div class="qtdeProdutoOpcao item-compacto-qtde">
+                <button class="removerQtdeOpcao">−</button>
+                <input class="qtdeOpcao" type="text" value="0" disabled>
+                <button class="adicionarQtdeOpcao">+</button>
+              </div>
+            </div>
+
+            <!-- Guaraná Antarctica Zero 2L -->
+            <div class="opcoes item-compacto" data-id="bebida04">
+              <img src="https://i.ibb.co/mCDVCq28/22965-0-20200423185140.webp" class="item-compacto-img"
+                alt="Guaraná Antarctica Zero 2L">
+              <div class="item-compacto-info">
+                <p class="item-compacto-nome">Guaraná Antarctica Zero 2L</p>
+              </div>
+              <span class="preco"><span style="display:none;">0.00</span></span>
+              <div class="qtdeProdutoOpcao item-compacto-qtde">
+                <button class="removerQtdeOpcao">−</button>
+                <input class="qtdeOpcao" type="text" value="0" disabled>
+                <button class="adicionarQtdeOpcao">+</button>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="overlay"></div>
+        <div class="imagem-ampliada">
+          <img src="#" alt="">
+          <button class="fechar"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <label
+          style="display: block; font-weight: bold; font-size: 16px; margin-top: 20px; margin-bottom: 10px;">Adicionar
+          algum detalhe?</label>
+        <input class="observacao" type="text" name="observacao" placeholder="Escreva o detalhe aqui..." maxlength="140"
+          style="width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 25px; font-size: 14px; box-sizing: border-box;">
+        <em
+          style="display: block; text-align: right; font-size: 13px; color: #999; margin-top: 5px;"><span>0</span>/140</em>
+      </div>
+      <div class="info3"
+        style="position: fixed; bottom: 0; left: 0; width: 100%; z-index: 1000; display: flex; align-items: center; justify-content: space-between; padding: 15px; background: #fff; border-top: 1px solid #eee; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); box-sizing: border-box;">
+        <input id="idProduto" type="hidden" name="idProduto" value="12111">
+        <!--<div class="qtdeProduto" style="display:none">-->
+        <div class="qtdeProduto" style="display: none">
+          <button class="removerQtde" aria-label="Remover">
+            <i class="fa-solid fa-minus"></i>
+          </button>
+          <input class="qtde" type="text" value="1" min="1" max="86" size="3" disabled="">
+          <button class="adicionarQtde" aria-label="Adicionar">
+            <i class="fa-solid fa-plus"></i>
+          </button>
+        </div>
+        <div id="precoProduto" style="font-size: 18px; font-weight: bold; color: #2e7d32;">
+          R$ 36,99
+        </div>
+        <span class="precoProduto" style="display: none">36.99</span>
+        <button class="btn adicionarProduto" onclick="finalizar('687ea04cfcc65d99d7010c61')"
+          style="background: #ea1d2c; color: white; border: none; padding: 12px 24px; border-radius: 25px; font-size: 14px; font-weight: bold; cursor: pointer;">
+          Adicionar ao carrinho
+        </button>
+        <a href="" id="finalizarPedido" style="display: none"></a>
+      </div>
+    </div>
+  </div>
+  <script type="text/javascript" src="../../../../js/jquery.js"></script>
+  <script type="text/javascript" src="../../../../js/deliveryProduto.js"></script>
+
+  <script src="../../../../js/all.js" data-auto-replace-svg="nest" defer="" type="text/javascript"></script>
+  <script type="text/javascript" src="../../../../js/jquery-mask.js" defer=""></script>
+
+  <script src="../../../../js/sweetalert.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <script>
+    function finalizar(productId) {
+      if (!productId) {
+        console.error("ID do produto não foi fornecido para a função finalizar().");
+        alert("Ocorreu um erro ao tentar adicionar o produto ao carrinho. ID do produto não encontrado.");
+        return;
+      }
+
+      const selecoes = [];
+
+      $('#complementos-gratis .opcoes').each(function () {
+        const qtde = parseInt($(this).find('.qtdeOpcao').val()) || 0;
+        if (qtde > 0) {
+          const nomeCompleto = $(this).find('.item-compacto-nome').text();
+          const nome = nomeCompleto.replace(/\(incluso\)/gi, '').replace(/\+ ?R\$.*$/gi, '').trim();
+          selecoes.push({ nome, qtde, preco: 0, tipo: 'acompanhamento' });
+        }
+      });
+
+      $('#saladas .opcoes').each(function () {
+        const qtde = parseInt($(this).find('.qtdeOpcao').val()) || 0;
+        if (qtde > 0) {
+          const nomeCompleto = $(this).find('.item-compacto-nome').text();
+          const nome = nomeCompleto.replace(/\(incluso\)/gi, '').replace(/\+ ?R\$.*$/gi, '').trim();
+          selecoes.push({ nome, qtde, preco: 0, tipo: 'salada' });
+        }
+      });
+
+      $('#bebidas .opcoes').each(function () {
+        const qtde = parseInt($(this).find('.qtdeOpcao').val()) || 0;
+        if (qtde > 0) {
+          const nomeCompleto = $(this).find('.item-compacto-nome').text();
+          const nome = nomeCompleto.split('+')[0].trim();
+          const precoTexto = $(this).find('.preco span').text();
+          const preco = parseFloat(precoTexto) || 0;
+          selecoes.push({ nome, qtde, preco, tipo: 'bebida' });
+        }
+      });
+
+      const precoTotal = parseFloat($('.precoProduto').text()) || 0;
+
+      localStorage.setItem('pendingSelections', JSON.stringify({
+        productId,
+        selecoes,
+        precoTotal
+      }));
+
+      const cartBaseUrl = "../../../../shop/681aaff4852ac923b1bcabfb/cart.html";
+      let params = new URLSearchParams(window.location.search);
+      params.set('id', productId);
+      const cartUrl = cartBaseUrl + "?" + params.toString();
+      window.location.href = cartUrl;
+    }
+  </script>
+
+  <style>
+    figure img {
+      object-fit: contain !important;
+    }
+  </style>
+
+  <script>
+    // Função customizada para recalcular o total incluindo acompanhamentos e bebidas
+    function calcularPrecoTotal() {
+      // Preço base do produto
+      var precoBase = 49.90;
+      var totalAcompanhamentos = 0;
+      var totalBebidas = 0;
+
+      // Somar preços dos acompanhamentos selecionados
+      $('#complementos-gratis .opcoes').each(function () {
+        var qtde = parseInt($(this).find('.qtdeOpcao').val()) || 0;
+        if (qtde > 0) {
+          var precoTexto = $(this).find('span[style="display:none;"]').text();
+          var preco = parseFloat(precoTexto) || 0;
+          totalAcompanhamentos += qtde * preco;
+        }
+      });
+
+      // Somar preços das bebidas selecionadas
+      $('#bebidas .opcoes').each(function () {
+        var qtde = parseInt($(this).find('.qtdeOpcao').val()) || 0;
+        if (qtde > 0) {
+          var precoTexto = $(this).find('.preco span').text();
+          var preco = parseFloat(precoTexto) || 0;
+          totalBebidas += qtde * preco;
+        }
+      });
+
+      var total = precoBase + totalAcompanhamentos + totalBebidas;
+
+      // Atualizar o preço exibido
+      $('#precoProduto').html(total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }));
+      $('.precoProduto').text(total.toFixed(2));
+
+      console.log('Preço base:', precoBase, 'Acompanhamentos:', totalAcompanhamentos, 'Bebidas:', totalBebidas, 'Total:', total);
+    }
+
+    $(document).ready(function () {
+      // Calcular preço inicial
+      calcularPrecoTotal();
+
+      // Recalcular quando clicar nos botões de acompanhamentos
+      $(document).on('click', '#complementos-gratis .adicionarQtdeOpcao, #complementos-gratis .removerQtdeOpcao', function () {
+        setTimeout(calcularPrecoTotal, 50);
+      });
+
+      // Recalcular quando clicar nos botões de bebidas
+      $(document).on('click', '#bebidas .adicionarQtdeOpcao, #bebidas .removerQtdeOpcao', function () {
+        setTimeout(calcularPrecoTotal, 50);
+      });
+    });
+  </script>
+</body>
+
+</html>

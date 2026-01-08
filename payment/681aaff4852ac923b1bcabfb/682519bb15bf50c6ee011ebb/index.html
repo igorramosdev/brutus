@@ -1,0 +1,256 @@
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Finalizar Pagamento</title>
+  
+  <link type="text/css" href="/css/delivry-25.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <style>
+    /* Estilos Específicos da Página de Pagamento */
+    .containerFinalizar { margin-top: 20px; max-width: 600px; margin-left: auto; margin-right: auto; }
+    .payment-area { background: #fff; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+    #qrcode { display: flex; justify-content: center; margin: 20px 0; min-height: 200px; align-items: center; }
+    #qrcode img { max-width: 250px; width: 100%; border: 1px solid #eee; padding: 5px; border-radius: 10px; }
+    textarea { width: 100%; height: 80px; padding: 10px; border: 1px dashed #ea1d2c; border-radius: 8px; background: #fafafa; font-size: 12px; resize: none; color: #555; }
+    .copy-code { width: 100%; background: #ea1d2c; color: white; border: none; padding: 15px; border-radius: 50px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s; }
+    .copy-code:hover { background: #c41421; }
+    
+    /* Steps */
+    .steps { display: flex; justify-content: space-between; margin-top: 30px; position: relative; }
+    .step { text-align: center; width: 30%; opacity: 0.5; transition: 0.3s; z-index: 2; }
+    .step.active { opacity: 1; font-weight: bold; }
+    .s-circle { width: 30px; height: 30px; background: #eee; border-radius: 50%; margin: 0 auto 5px; display: flex; align-items: center; justify-content: center; color: #555; }
+    .step.active .s-circle { background: #ea1d2c; color: white; }
+    .step-line { position: absolute; top: 15px; left: 15%; width: 70%; height: 2px; background: #eee; z-index: 1; }
+    
+    /* Loading */
+    .loading-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.9); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10; border-radius: 15px; }
+    .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #ea1d2c; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  </style>
+</head>
+
+<body>
+  <header id="topo">
+    <div class="cover main" style="background-color: #ea1d2c; height: 100px; display:flex; align-items:center; justify-content:center;">
+        <h1 style="color: white; font-size: 1.5rem;">Finalizar Pedido</h1>
+    </div>
+  </header>
+
+  <div class="container containerFinalizar">
+    <div class="payment-area">
+      
+      <div id="loading" class="loading-overlay">
+        <div class="spinner"></div>
+        <p style="margin-top: 10px;">Gerando seu Pix...</p>
+      </div>
+
+      <h2 style="text-align: center; color: #ea1d2c;">Pagamento via Pix</h2>
+      <p style="text-align: center; color: #666; font-size: 0.9rem;">O QR Code expira em 30 minutos</p>
+
+      <div id="qrcode"></div>
+
+      <div style="position: relative;">
+        <textarea id="pix-text" readonly onclick="this.select()">Aguardando geração do código...</textarea>
+        <button class="copy-code" id="btn-copy">
+          <i class="fa fa-copy"></i> COPIAR CÓDIGO PIX
+        </button>
+      </div>
+
+      <div class="steps">
+        <div class="step-line"></div>
+        <div class="step active" id="step1">
+          <div class="s-circle">1</div>
+          <span>Gerar</span>
+        </div>
+        <div class="step active" id="step2">
+          <div class="s-circle"><i class="fa fa-qrcode"></i></div>
+          <span>Pagar</span>
+        </div>
+        <div class="step" id="step3">
+          <div class="s-circle"><i class="fa fa-check"></i></div>
+          <span>Aprovado</span>
+        </div>
+      </div>
+
+      <div class="how-to-pay" style="margin-top: 30px; font-size: 0.85rem; color: #555;">
+        <strong>Como pagar:</strong>
+        <ol style="margin-left: 20px; line-height: 1.6;">
+            <li>Abra o app do seu banco.</li>
+            <li>Escolha a opção <b>Pix</b> > <b>Ler QR Code</b> ou <b>Pix Copia e Cola</b>.</li>
+            <li>Escaneie a imagem ou cole o código acima.</li>
+            <li>Confirme os dados e finalize.</li>
+        </ol>
+      </div>
+
+    </div>
+  </div>
+
+  <footer>
+    <div style="padding: 20px; text-align: center; color: white; background: #ea1d2c; margin-top: 30px;">
+        <p>&copy; 2025 Cheff Burguer - Pagamento Seguro</p>
+    </div>
+  </footer>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+        const loadingEl = document.getElementById('loading');
+        const qrCodeEl = document.getElementById('qrcode');
+        const pixTextEl = document.getElementById('pix-text');
+        const btnCopy = document.getElementById('btn-copy');
+        
+        // 1. Recuperar dados do pedido (LocalStorage ou URL)
+        const urlParams = new URLSearchParams(window.location.search);
+        let amount = urlParams.get('amount');
+        let customerName = urlParams.get('name');
+        
+        if (!amount) {
+            const cartData = localStorage.getItem('totalCart'); 
+            if (cartData) amount = cartData;
+        }
+
+        const paymentPayload = {
+            amount: amount || "29.90",
+            description: "Pedido Delivery Cheff Burguer",
+            customer: {
+                name: customerName || "Cliente Visitante",
+                email: "cliente@exemplo.com",
+                cpf: "000.000.000-00" 
+            }
+        };
+
+        // 2. Função para Gerar o Pix na AnubisPay
+        async function generatePix() {
+            try {
+                // --- CORREÇÃO AQUI ---
+                // Pega a URL base automaticamente (ex: https://seu-app.vercel.app)
+                const baseUrl = window.location.origin;
+                // Monta o caminho correto para a pasta API
+                const endpoint = `${baseUrl}/api/generate-pix`; 
+
+                console.log("Iniciando requisição para:", endpoint);
+
+                const response = await fetch(endpoint, { 
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(paymentPayload)
+                });
+
+                // Verifica erro de HTTP antes de tentar ler JSON
+                if (!response.ok) {
+                    const errText = await response.text();
+                    // Se for HTML, é erro de rota ou servidor
+                    if (errText.trim().startsWith('<')) {
+                        throw new Error(`Erro do Servidor (${response.status}): Verifique se o arquivo generate-pix.js está na pasta /api/ e se as chaves da Anubis estão no .env`);
+                    }
+                    throw new Error(`Erro na API (${response.status}): ${errText}`);
+                }
+
+                const textData = await response.text();
+                let data;
+
+                try {
+                    data = JSON.parse(textData);
+                } catch (e) {
+                    console.error("Recebido HTML em vez de JSON:", textData);
+                    throw new Error(`Erro de resposta: O servidor não retornou um JSON válido.`);
+                }
+
+                if (data.success) {
+                    renderPix(data);
+                    startPolling(data.transactionId);
+                } else {
+                    throw new Error(data.error || data.details || "Erro desconhecido ao processar pagamento.");
+                }
+            } catch (error) {
+                console.error(error);
+                loadingEl.innerHTML = `
+                    <div style="text-align:center; padding: 20px;">
+                        <i class="fa fa-times-circle" style="font-size: 40px; color: #ea1d2c; margin-bottom:15px;"></i>
+                        <p style="color:#ea1d2c; font-weight:bold; font-size:1.1rem;">Erro ao gerar Pix</p>
+                        <p style="color:#555; font-size: 0.9rem; background:#f9f9f9; padding:10px; border-radius:5px; border:1px dashed #ccc;">${error.message}</p>
+                        <button onclick="location.reload()" style="margin-top:15px; padding:10px 25px; border:none; background:#ea1d2c; color:white; border-radius:5px; cursor:pointer; font-weight:bold;">Tentar Novamente</button>
+                    </div>
+                `;
+            }
+        }
+
+        // 3. Renderizar o Pix na tela
+        function renderPix(data) {
+            loadingEl.style.display = 'none';
+            pixTextEl.value = data.pix_copy_paste;
+            qrCodeEl.innerHTML = ''; 
+            
+            if (data.qr_code_base64 && data.qr_code_base64.length > 50) {
+                const img = document.createElement('img');
+                img.src = data.qr_code_base64.startsWith('data:') 
+                    ? data.qr_code_base64 
+                    : `data:image/png;base64,${data.qr_code_base64}`;
+                qrCodeEl.appendChild(img);
+            } else {
+                new QRCode(qrCodeEl, {
+                    text: data.pix_copy_paste,
+                    width: 250,
+                    height: 250,
+                    correctLevel: QRCode.CorrectLevel.L
+                });
+            }
+        }
+
+        // 4. Botão Copiar
+        btnCopy.addEventListener('click', () => {
+            pixTextEl.select();
+            document.execCommand('copy');
+            btnCopy.innerHTML = '<i class="fa fa-check"></i> COPIADO!';
+            btnCopy.style.background = '#077c22';
+            setTimeout(() => {
+                btnCopy.innerHTML = '<i class="fa fa-copy"></i> COPIAR CÓDIGO PIX';
+                btnCopy.style.background = '#ea1d2c';
+            }, 2000);
+        });
+
+        // 5. Verificar Status do Pagamento (Polling)
+        function startPolling(transactionId) {
+            if (!transactionId) return;
+            const baseUrl = window.location.origin; // Garante o caminho correto também aqui
+
+            const interval = setInterval(async () => {
+                try {
+                    const res = await fetch(`${baseUrl}/api/check-status?id=${transactionId}`);
+                    const statusData = await res.json();
+
+                    if (statusData.paid) {
+                        clearInterval(interval);
+                        handlePaymentApproved();
+                    }
+                } catch (e) {
+                    console.log("Aguardando pagamento...");
+                }
+            }, 5000); 
+        }
+
+        function handlePaymentApproved() {
+            document.getElementById('step3').classList.add('active');
+            
+            Swal.fire({
+                icon: 'success',
+                title: 'Pagamento Aprovado!',
+                text: 'Seu pedido está sendo preparado.',
+                confirmButtonColor: '#077c22',
+                confirmButtonText: 'Acompanhar Entrega'
+            }).then(() => {
+                window.location.href = '/entrega'; 
+            });
+        }
+
+        generatePix();
+    });
+  </script>
+</body>
+</html>
