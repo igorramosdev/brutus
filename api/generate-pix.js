@@ -1,6 +1,7 @@
 const fetch = require('node-fetch');
 
 module.exports = async (req, res) => {
+  // Configuração de CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -14,11 +15,13 @@ module.exports = async (req, res) => {
     const secretKey = process.env.ANUBIS_SECRET_KEY;
 
     if (!publicKey || !secretKey) {
-      return res.status(500).json({ error: 'Erro de configuração.', details: 'Credenciais ausentes.' });
+      console.error("Credenciais ausentes");
+      return res.status(500).json({ error: 'Erro de configuração do servidor (Credenciais).' });
     }
 
     const { amount, customer, items } = req.body;
 
+    // Tratamento do Valor
     let valueInCents = 0;
     if (typeof amount === 'string') {
       valueInCents = Math.round(parseFloat(amount.replace('R$', '').replace(/\./g, '').replace(',', '.')) * 100);
@@ -26,9 +29,20 @@ module.exports = async (req, res) => {
       valueInCents = Math.round(amount * 100);
     }
 
+    // Tratamento Robusto do Telefone (A Anubis exige este campo)
+    // Se não vier do frontend, usa um padrão '11999999999'
+    let phoneToSend = '11999999999';
+    if (customer && customer.phone) {
+        // Remove tudo que não for número
+        const cleanPhone = customer.phone.replace(/\D/g, '');
+        // Verifica se tem tamanho mínimo de um telefone BR (10 ou 11 dígitos)
+        if (cleanPhone.length >= 10) {
+            phoneToSend = cleanPhone;
+        }
+    }
+
     const auth = Buffer.from(`${publicKey}:${secretKey}`).toString('base64');
 
-    // --- CORREÇÃO AQUI: ADICIONADO O CAMPO PHONE ---
     const apiPayload = {
       amount: valueInCents,
       payment_method: 'pix',
@@ -36,18 +50,19 @@ module.exports = async (req, res) => {
       customer: {
         name: customer?.name || 'Cliente Visitante',
         email: customer?.email || 'cliente@email.com',
-        // A Anubis exige telefone. Se não vier, usamos um padrão válido.
-        phone: customer?.phone?.replace(/\D/g, '') || '11999999999', 
+        // AQUI ESTÁ A CORREÇÃO CRÍTICA:
+        phone: phoneToSend, 
         document: {
           type: 'cpf',
-          number: customer?.cpf?.replace(/\D/g, '') || '12345678909' // CPF Padrão válido para teste
+          // Garante apenas números no CPF
+          number: customer?.cpf?.replace(/\D/g, '') || '12345678909'
         }
       },
       items: items || [{ title: 'Pedido Online', unit_price: valueInCents, quantity: 1, tangible: false }],
       metadata: { provider_name: "Checkout Vercel" }
     };
 
-    console.log("Payload enviado:", JSON.stringify(apiPayload));
+    console.log("Enviando para Anubis:", JSON.stringify(apiPayload));
 
     const apiResponse = await fetch('https://api2.anubispay.com.br/v1/payment-transaction/create', {
       method: 'POST',
@@ -61,8 +76,9 @@ module.exports = async (req, res) => {
 
     const responseText = await apiResponse.text();
 
+    // Verificação de segurança para erro HTML
     if (responseText.trim().startsWith('<')) {
-      return res.status(502).json({ error: 'Erro na operadora.', details: 'API retornou HTML.' });
+      return res.status(502).json({ error: 'Erro na operadora.', details: 'A API retornou HTML em vez de JSON.' });
     }
 
     let data;
@@ -84,13 +100,15 @@ module.exports = async (req, res) => {
         qr_code_base64: qrImage
       });
     } else {
+      console.error("Erro Anubis:", data);
       return res.status(apiResponse.status).json({
         error: data.message || 'Falha ao processar pagamento na AnubisPay.',
-        details: data // Isso mostra o erro exato no frontend
+        details: data // Envia o erro exato para o frontend
       });
     }
 
   } catch (error) {
+    console.error("Erro Interno:", error);
     return res.status(500).json({ error: 'Erro interno: ' + error.message });
   }
 };
