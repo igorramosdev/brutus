@@ -115,13 +115,15 @@
             if (cartData) amount = cartData;
         }
 
+        // --- ATUALIZADO ---
         const paymentPayload = {
             amount: amount || "29.90",
             description: "Pedido Delivery Cheff Burguer",
             customer: {
                 name: customerName || "Cliente Visitante",
                 email: "cliente@exemplo.com",
-                cpf: "000.000.000-00" 
+                cpf: "123.456.789-09",
+                phone: customerPhone || "11999999999" // Envia um telefone padrão se não tiver
             }
         };
 
